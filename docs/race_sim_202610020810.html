@@ -87,7 +87,12 @@ var GEOM = {"straightHalf": 160.21500000000003, "ry": 61.98925, "realOneLap": 14
   tag.textContent="ゴール";
   var scale = len / GEOM.realOneLap;
   var raceDistSvg = GEOM.distance * scale;
-  var startFrac = ((goalFrac*len - raceDistSvg) % len + len) % len / len;
+  // ★過去バグ: レース距離が1周(len)より長い場合(例:中京芝2000m対1周1705.9m)、
+  //   従来はstartFracとgoalFracの差を"1周未満の弧(%1)"に丸めていたため、
+  //   実際は1周以上グルっと回るはずの距離が4角付近の短い弧に圧縮されてしまっていた。
+  //   周回数(lapsSpan)を%1で丸めず、実距離ぶんそのまま進める形に修正。
+  var lapsSpan = raceDistSvg / len; // 1周に満たない場合もあれば複数周のこともある
+  var startFrac = (((goalFrac * len - raceDistSvg) % len) + len) % len / len;
   var g=document.getElementById("horses");
   horses.forEach(function(h,i){
     var el=document.createElementNS("http://www.w3.org/2000/svg","g");
@@ -97,7 +102,7 @@ var GEOM = {"straightHalf": 160.21500000000003, "ry": 61.98925, "realOneLap": 14
   });
   function drawTrialStrength(h){ var noise=-Math.log(-Math.log(Math.random())); return h.strength+noise; }
   var pace="M", paceShift={S:-0.04,M:0,H:0.04}, playing=false,t0=null,speedMult=1,raceDur=7000;
-  function pathFrac(progress){ var span=((goalFrac-startFrac)%1+1)%1; return (startFrac+span*progress)%1; }
+  function pathFrac(progress){ return (startFrac + lapsSpan*progress) % 1; }
   function place2(progress){
     var stretch = progress>0.8 ? (progress-0.8)/0.2 : 0;
     var order=[];

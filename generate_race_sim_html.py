@@ -121,7 +121,12 @@ var GEOM = {geom_json};
   tag.textContent="ゴール";
   var scale = len / GEOM.realOneLap;
   var raceDistSvg = GEOM.distance * scale;
-  var startFrac = ((goalFrac*len - raceDistSvg) % len + len) % len / len;
+  // ★過去バグ: レース距離が1周(len)より長い場合(例:中京芝2000m対1周1705.9m)、
+  //   従来はstartFracとgoalFracの差を"1周未満の弧(%1)"に丸めていたため、
+  //   実際は1周以上グルっと回るはずの距離が4角付近の短い弧に圧縮されてしまっていた。
+  //   周回数(lapsSpan)を%1で丸めず、実距離ぶんそのまま進める形に修正。
+  var lapsSpan = raceDistSvg / len; // 1周に満たない場合もあれば複数周のこともある
+  var startFrac = (((goalFrac * len - raceDistSvg) % len) + len) % len / len;
   var g=document.getElementById("horses");
   horses.forEach(function(h,i){{
     var el=document.createElementNS("http://www.w3.org/2000/svg","g");
@@ -131,7 +136,7 @@ var GEOM = {geom_json};
   }});
   function drawTrialStrength(h){{ var noise=-Math.log(-Math.log(Math.random())); return h.strength+noise; }}
   var pace="M", paceShift={{S:-0.04,M:0,H:0.04}}, playing=false,t0=null,speedMult=1,raceDur=7000;
-  function pathFrac(progress){{ var span=((goalFrac-startFrac)%1+1)%1; return (startFrac+span*progress)%1; }}
+  function pathFrac(progress){{ return (startFrac + lapsSpan*progress) % 1; }}
   function place2(progress){{
     var stretch = progress>0.8 ? (progress-0.8)/0.2 : 0;
     var order=[];
@@ -206,17 +211,29 @@ def geom_for_race(geom_all, place, surface, distance):
     妥当なフォールバック値(全場平均的な数値)を使い、is_fallbackで明示する。"""
     g = geom_all.get(place, {})
     turn = g.get("turn", "右")
-    # 直線長: 芝/ダートで別値がある場合はそちらを優先、なければhome_stretch_m系を探す
+    is_turf = (surface == "芝")
+    # 直線長: 必ず該当サーフェス(芝/ダート)の値を最優先する。
+    # ★過去バグ: 汎用キー"home_stretch_m"を最優先にしていたため、新潟の芝外回り値(659m)を
+    #   ダートレースにまで誤流用していた(ダートは実際約350mで別物)。サーフェス別キーを最優先に修正。
+    if is_turf:
+        keys = ("home_stretch_turf_m", "home_stretch_turf_outer_m", "home_stretch_turf_inner_m",
+                "home_stretch_m")
+    else:
+        keys = ("home_stretch_dirt_m", "home_stretch_m")
     hs = None
-    for key in ("home_stretch_m", f"home_stretch_{'turf' if surface=='芝' else 'dirt'}_m",
-                "home_stretch_turf_inner_m", "home_stretch_turf_outer_m"):
+    for key in keys:
         if g.get(key):
             hs = g[key]
             break
     if hs is None:
         hs = 300  # フォールバック(全場中央値程度)
-    one_lap = (g.get("one_lap_turf_m") or g.get("one_lap_turf_outer_m") or
-               g.get("one_lap_turf_inner_m") or g.get("one_lap_dirt_m") or 1900)
+    # 1周距離も同様にサーフェス別を優先(ダートレースに芝の1周距離を使わない)
+    if is_turf:
+        one_lap = (g.get("one_lap_turf_m") or g.get("one_lap_turf_outer_m") or
+                   g.get("one_lap_turf_inner_m") or g.get("one_lap_dirt_m") or 1900)
+    else:
+        one_lap = (g.get("one_lap_dirt_m") or g.get("one_lap_turf_m") or
+                   g.get("one_lap_turf_outer_m") or g.get("one_lap_turf_inner_m") or 1900)
     straight_half = min(225, max(90, hs * 0.55))  # SVG座標系(614幅)にスケール
     ry = max(38, 70 - straight_half * 0.05)
     is_straight_course = (place == "新潟" and surface == "芝" and int(distance) == 1000)

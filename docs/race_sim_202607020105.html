@@ -44,7 +44,7 @@
 </div>
 <script>
 var HORSES = [{"num": 1, "name": "インヴァイト", "color": "#ffffff", "text_color": "#1a2e22", "style": "逃げ", "p_top3": 0.1665421956684092, "s": 0.04909937093404197}, {"num": 2, "name": "ワンダーヴァレル", "color": "#ffffff", "text_color": "#1a2e22", "style": "先行", "p_top3": 0.1373904074265085, "s": 0.04050494560816505}, {"num": 3, "name": "イルミナジーティー", "color": "#1a1a1a", "text_color": "#fff", "style": "好位", "p_top3": 0.2462845010615711, "s": 0.07260871050964113}, {"num": 4, "name": "ペガサスジルシ", "color": "#1a1a1a", "text_color": "#fff", "style": "中団", "p_top3": 0.6259469696969697, "s": 0.18453943354621447}, {"num": 5, "name": "セコンドトゥベスト", "color": "#e2453f", "text_color": "#fff", "style": "追込", "p_top3": 0.5300353356890459, "s": 0.1562631106831408}, {"num": 6, "name": "スレイクイーン", "color": "#e2453f", "text_color": "#fff", "style": "逃げ", "p_top3": 0.1029973552747575, "s": 0.030365309713638457}, {"num": 7, "name": "ラヴエナストロ", "color": "#3b6ee0", "text_color": "#fff", "style": "先行", "p_top3": 0.2462845010615711, "s": 0.07260871050964113}, {"num": 8, "name": "リアライズアリス", "color": "#3b6ee0", "text_color": "#fff", "style": "好位", "p_top3": 0.1373904074265085, "s": 0.04050494560816505}, {"num": 9, "name": "セイロンブリーズ", "color": "#f2b632", "text_color": "#1a2e22", "style": "中団", "p_top3": 0.1398963730569948, "s": 0.04124374537927042}, {"num": 10, "name": "ノーブルクインダム", "color": "#f2b632", "text_color": "#1a2e22", "style": "追込", "p_top3": 0.1029973552747575, "s": 0.030365309713638457}, {"num": 11, "name": "セルヴァジオ", "color": "#2fa64d", "text_color": "#fff", "style": "逃げ", "p_top3": 0.1665421956684092, "s": 0.04909937093404197}, {"num": 12, "name": "ファルカータ", "color": "#2fa64d", "text_color": "#fff", "style": "先行", "p_top3": 0.3610431947840262, "s": 0.10644145570896325}, {"num": 13, "name": "トレッチェ", "color": "#e368a8", "text_color": "#fff", "style": "好位", "p_top3": 0.1996966632962588, "s": 0.058873851795466434}, {"num": 14, "name": "ヒーナシャム", "color": "#e368a8", "text_color": "#fff", "style": "中団", "p_top3": 0.0289532293986636, "s": 0.008535886922097596}, {"num": 15, "name": "マルモリキャスター", "color": "#f07f2e", "text_color": "#fff", "style": "追込", "p_top3": 0.0625504439063761, "s": 0.018440896825708826}, {"num": 16, "name": "ダーコ", "color": "#f07f2e", "text_color": "#fff", "style": "逃げ", "p_top3": 0.1373904074265085, "s": 0.04050494560816505}];
-var GEOM = {"straightHalf": 165.0, "ry": 61.75, "realOneLap": 1530, "distance": 1600, "turn": "左", "is_straight_course": false};
+var GEOM = {"straightHalf": 225, "ry": 58.75, "realOneLap": 1705.9, "distance": 1600, "turn": "左", "is_straight_course": false};
 (function(){
   var horses = HORSES;
   var styleBase = {"逃げ":0.97,"先行":0.80,"好位":0.60,"中団":0.38,"追込":0.15};
@@ -87,7 +87,12 @@ var GEOM = {"straightHalf": 165.0, "ry": 61.75, "realOneLap": 1530, "distance": 
   tag.textContent="ゴール";
   var scale = len / GEOM.realOneLap;
   var raceDistSvg = GEOM.distance * scale;
-  var startFrac = ((goalFrac*len - raceDistSvg) % len + len) % len / len;
+  // ★過去バグ: レース距離が1周(len)より長い場合(例:中京芝2000m対1周1705.9m)、
+  //   従来はstartFracとgoalFracの差を"1周未満の弧(%1)"に丸めていたため、
+  //   実際は1周以上グルっと回るはずの距離が4角付近の短い弧に圧縮されてしまっていた。
+  //   周回数(lapsSpan)を%1で丸めず、実距離ぶんそのまま進める形に修正。
+  var lapsSpan = raceDistSvg / len; // 1周に満たない場合もあれば複数周のこともある
+  var startFrac = (((goalFrac * len - raceDistSvg) % len) + len) % len / len;
   var g=document.getElementById("horses");
   horses.forEach(function(h,i){
     var el=document.createElementNS("http://www.w3.org/2000/svg","g");
@@ -97,7 +102,7 @@ var GEOM = {"straightHalf": 165.0, "ry": 61.75, "realOneLap": 1530, "distance": 
   });
   function drawTrialStrength(h){ var noise=-Math.log(-Math.log(Math.random())); return h.strength+noise; }
   var pace="M", paceShift={S:-0.04,M:0,H:0.04}, playing=false,t0=null,speedMult=1,raceDur=7000;
-  function pathFrac(progress){ var span=((goalFrac-startFrac)%1+1)%1; return (startFrac+span*progress)%1; }
+  function pathFrac(progress){ return (startFrac + lapsSpan*progress) % 1; }
   function place2(progress){
     var stretch = progress>0.8 ? (progress-0.8)/0.2 : 0;
     var order=[];

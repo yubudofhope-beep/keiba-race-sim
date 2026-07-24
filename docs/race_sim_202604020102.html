@@ -44,7 +44,7 @@
 </div>
 <script>
 var HORSES = [{"num": 1, "name": "エレクトス", "color": "#ffffff", "text_color": "#1a2e22", "style": "逃げ", "p_top3": 0.1987654320987654, "s": 0.0578030044834256}, {"num": 2, "name": "リコルディオーロ", "color": "#1a1a1a", "text_color": "#fff", "style": "先行", "p_top3": 0.1665421956684092, "s": 0.04843216036738812}, {"num": 3, "name": "モミスケ", "color": "#e2453f", "text_color": "#fff", "style": "好位", "p_top3": 0.1029973552747575, "s": 0.029952676005400674}, {"num": 4, "name": "ピウモッソ", "color": "#e2453f", "text_color": "#fff", "style": "中団", "p_top3": 0.6259469696969697, "s": 0.18203173013405155}, {"num": 5, "name": "ランズエンド", "color": "#3b6ee0", "text_color": "#fff", "style": "追込", "p_top3": 0.3954864964853866, "s": 0.11501148609241033}, {"num": 6, "name": "ユイチャンファイト", "color": "#3b6ee0", "text_color": "#fff", "style": "逃げ", "p_top3": 0.2462845010615711, "s": 0.07162203190334653}, {"num": 7, "name": "サザンキンレンカ", "color": "#f2b632", "text_color": "#1a2e22", "style": "先行", "p_top3": 0.1996966632962588, "s": 0.05807381596465474}, {"num": 8, "name": "アレックスケー", "color": "#f2b632", "text_color": "#1a2e22", "style": "好位", "p_top3": 0.1665421956684092, "s": 0.04843216036738812}, {"num": 9, "name": "スクワミッシュ", "color": "#2fa64d", "text_color": "#fff", "style": "中団", "p_top3": 0.1987654320987654, "s": 0.0578030044834256}, {"num": 10, "name": "ライヴバーボン", "color": "#2fa64d", "text_color": "#fff", "style": "追込", "p_top3": 0.1587163920208152, "s": 0.04615633725996011}, {"num": 11, "name": "イニシャルポイント", "color": "#e368a8", "text_color": "#fff", "style": "逃げ", "p_top3": 0.3390681003584229, "s": 0.09860444403363766}, {"num": 12, "name": "ミカミッチー", "color": "#e368a8", "text_color": "#fff", "style": "先行", "p_top3": 0.1665421956684092, "s": 0.04843216036738812}, {"num": 13, "name": "オンアロール", "color": "#f07f2e", "text_color": "#fff", "style": "好位", "p_top3": 0.2462845010615711, "s": 0.07162203190334653}, {"num": 14, "name": "コパノフラメンコ", "color": "#f07f2e", "text_color": "#fff", "style": "中団", "p_top3": 0.2270311313591496, "s": 0.06602295663417634}];
-var GEOM = {"straightHalf": 225, "ry": 58.75, "realOneLap": 2223, "distance": 1200, "turn": "左", "is_straight_course": false};
+var GEOM = {"straightHalf": 192.50000000000003, "ry": 60.375, "realOneLap": 2223, "distance": 1200, "turn": "左", "is_straight_course": false};
 (function(){
   var horses = HORSES;
   var styleBase = {"逃げ":0.97,"先行":0.80,"好位":0.60,"中団":0.38,"追込":0.15};
@@ -87,7 +87,12 @@ var GEOM = {"straightHalf": 225, "ry": 58.75, "realOneLap": 2223, "distance": 12
   tag.textContent="ゴール";
   var scale = len / GEOM.realOneLap;
   var raceDistSvg = GEOM.distance * scale;
-  var startFrac = ((goalFrac*len - raceDistSvg) % len + len) % len / len;
+  // ★過去バグ: レース距離が1周(len)より長い場合(例:中京芝2000m対1周1705.9m)、
+  //   従来はstartFracとgoalFracの差を"1周未満の弧(%1)"に丸めていたため、
+  //   実際は1周以上グルっと回るはずの距離が4角付近の短い弧に圧縮されてしまっていた。
+  //   周回数(lapsSpan)を%1で丸めず、実距離ぶんそのまま進める形に修正。
+  var lapsSpan = raceDistSvg / len; // 1周に満たない場合もあれば複数周のこともある
+  var startFrac = (((goalFrac * len - raceDistSvg) % len) + len) % len / len;
   var g=document.getElementById("horses");
   horses.forEach(function(h,i){
     var el=document.createElementNS("http://www.w3.org/2000/svg","g");
@@ -97,7 +102,7 @@ var GEOM = {"straightHalf": 225, "ry": 58.75, "realOneLap": 2223, "distance": 12
   });
   function drawTrialStrength(h){ var noise=-Math.log(-Math.log(Math.random())); return h.strength+noise; }
   var pace="M", paceShift={S:-0.04,M:0,H:0.04}, playing=false,t0=null,speedMult=1,raceDur=7000;
-  function pathFrac(progress){ var span=((goalFrac-startFrac)%1+1)%1; return (startFrac+span*progress)%1; }
+  function pathFrac(progress){ return (startFrac + lapsSpan*progress) % 1; }
   function place2(progress){
     var stretch = progress>0.8 ? (progress-0.8)/0.2 : 0;
     var order=[];

@@ -44,7 +44,7 @@
 </div>
 <script>
 var HORSES = [{"num": 1, "name": "メイショウホウレン", "color": "#ffffff", "text_color": "#1a2e22", "style": "逃げ", "p_top3": 0.1632566069906223, "s": 0.04760060943851995}, {"num": 2, "name": "ジョーローリット", "color": "#ffffff", "text_color": "#1a2e22", "style": "先行", "p_top3": 0.1632566069906223, "s": 0.04760060943851995}, {"num": 3, "name": "ロードアウォード", "color": "#1a1a1a", "text_color": "#fff", "style": "好位", "p_top3": 0.2973484848484848, "s": 0.08669768014486186}, {"num": 4, "name": "カズゴルティス", "color": "#1a1a1a", "text_color": "#fff", "style": "中団", "p_top3": 0.0109606705351386, "s": 0.0031957946875460614}, {"num": 5, "name": "エコロアゼル", "color": "#e2453f", "text_color": "#fff", "style": "追込", "p_top3": 0.0876246966837422, "s": 0.02554866869339735}, {"num": 6, "name": "ケイアイアニラ", "color": "#e2453f", "text_color": "#fff", "style": "逃げ", "p_top3": 0.1632566069906223, "s": 0.04760060943851995}, {"num": 7, "name": "ガビーズシスター", "color": "#3b6ee0", "text_color": "#fff", "style": "先行", "p_top3": 0.5246212121212122, "s": 0.15296342293074358}, {"num": 8, "name": "マニバドラ", "color": "#3b6ee0", "text_color": "#fff", "style": "好位", "p_top3": 0.2059514487079091, "s": 0.060049113196415246}, {"num": 9, "name": "ジャスパーゴールド", "color": "#f2b632", "text_color": "#1a2e22", "style": "中団", "p_top3": 0.1324479103204581, "s": 0.03861774029442121}, {"num": 10, "name": "ゲッティヴィラ", "color": "#f2b632", "text_color": "#1a2e22", "style": "追込", "p_top3": 0.5096989966555183, "s": 0.1486125634866248}, {"num": 11, "name": "プレゼンティーア", "color": "#2fa64d", "text_color": "#fff", "style": "逃げ", "p_top3": 0.1632566069906223, "s": 0.04760060943851995}, {"num": 12, "name": "グッジョブ", "color": "#2fa64d", "text_color": "#fff", "style": "先行", "p_top3": 0.0876246966837422, "s": 0.02554866869339735}, {"num": 13, "name": "ユキマル", "color": "#e368a8", "text_color": "#fff", "style": "好位", "p_top3": 0.2111801242236025, "s": 0.061573634290483854}, {"num": 14, "name": "ファムエレガンテ", "color": "#e368a8", "text_color": "#fff", "style": "中団", "p_top3": 0.5015384615384615, "s": 0.1462332022339518}, {"num": 15, "name": "ショウナンアビアス", "color": "#f07f2e", "text_color": "#fff", "style": "追込", "p_top3": 0.2059514487079091, "s": 0.060049113196415246}, {"num": 16, "name": "ルディック", "color": "#f07f2e", "text_color": "#fff", "style": "逃げ", "p_top3": 0.0017421602787456, "s": 0.0005079603976617978}];
-var GEOM = {"straightHalf": 165.0, "ry": 61.75, "realOneLap": 1600, "distance": 1150, "turn": "右", "is_straight_course": false};
+var GEOM = {"straightHalf": 165.0, "ry": 61.75, "realOneLap": 1444.6, "distance": 1150, "turn": "右", "is_straight_course": false};
 (function(){
   var horses = HORSES;
   var styleBase = {"逃げ":0.97,"先行":0.80,"好位":0.60,"中団":0.38,"追込":0.15};
@@ -87,7 +87,12 @@ var GEOM = {"straightHalf": 165.0, "ry": 61.75, "realOneLap": 1600, "distance": 
   tag.textContent="ゴール";
   var scale = len / GEOM.realOneLap;
   var raceDistSvg = GEOM.distance * scale;
-  var startFrac = ((goalFrac*len - raceDistSvg) % len + len) % len / len;
+  // ★過去バグ: レース距離が1周(len)より長い場合(例:中京芝2000m対1周1705.9m)、
+  //   従来はstartFracとgoalFracの差を"1周未満の弧(%1)"に丸めていたため、
+  //   実際は1周以上グルっと回るはずの距離が4角付近の短い弧に圧縮されてしまっていた。
+  //   周回数(lapsSpan)を%1で丸めず、実距離ぶんそのまま進める形に修正。
+  var lapsSpan = raceDistSvg / len; // 1周に満たない場合もあれば複数周のこともある
+  var startFrac = (((goalFrac * len - raceDistSvg) % len) + len) % len / len;
   var g=document.getElementById("horses");
   horses.forEach(function(h,i){
     var el=document.createElementNS("http://www.w3.org/2000/svg","g");
@@ -97,7 +102,7 @@ var GEOM = {"straightHalf": 165.0, "ry": 61.75, "realOneLap": 1600, "distance": 
   });
   function drawTrialStrength(h){ var noise=-Math.log(-Math.log(Math.random())); return h.strength+noise; }
   var pace="M", paceShift={S:-0.04,M:0,H:0.04}, playing=false,t0=null,speedMult=1,raceDur=7000;
-  function pathFrac(progress){ var span=((goalFrac-startFrac)%1+1)%1; return (startFrac+span*progress)%1; }
+  function pathFrac(progress){ return (startFrac + lapsSpan*progress) % 1; }
   function place2(progress){
     var stretch = progress>0.8 ? (progress-0.8)/0.2 : 0;
     var order=[];

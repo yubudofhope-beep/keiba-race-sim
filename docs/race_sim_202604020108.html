@@ -44,7 +44,7 @@
 </div>
 <script>
 var HORSES = [{"num": 1, "name": "ヴィエントデコラ", "color": "#ffffff", "text_color": "#1a2e22", "style": "逃げ", "p_top3": 0.5969773299748111, "s": 0.17918051931981363}, {"num": 2, "name": "ライヴスプーン", "color": "#1a1a1a", "text_color": "#fff", "style": "先行", "p_top3": 0.0289532293986636, "s": 0.008690203830448863}, {"num": 3, "name": "ケルピー", "color": "#e2453f", "text_color": "#fff", "style": "好位", "p_top3": 0.4197860962566845, "s": 0.12599723130806947}, {"num": 4, "name": "メトロポリターナ", "color": "#3b6ee0", "text_color": "#fff", "style": "中団", "p_top3": 0.0, "s": 0.0}, {"num": 5, "name": "イリュストル", "color": "#3b6ee0", "text_color": "#fff", "style": "追込", "p_top3": 0.2270311313591496, "s": 0.06814254742372493}, {"num": 6, "name": "ロケットパンチ", "color": "#f2b632", "text_color": "#1a2e22", "style": "逃げ", "p_top3": 0.3954864964853866, "s": 0.11870379705576965}, {"num": 7, "name": "ハルノアラシ", "color": "#f2b632", "text_color": "#1a2e22", "style": "先行", "p_top3": 0.1665421956684092, "s": 0.049987018953947034}, {"num": 8, "name": "コッレヴェッキオ", "color": "#2fa64d", "text_color": "#fff", "style": "好位", "p_top3": 0.0058651026392961, "s": 0.001760388684805547}, {"num": 9, "name": "アヴァランチ", "color": "#2fa64d", "text_color": "#fff", "style": "中団", "p_top3": 0.2584269662921348, "s": 0.07756589019623657}, {"num": 10, "name": "パイオニアスクエア", "color": "#e368a8", "text_color": "#fff", "style": "追込", "p_top3": 0.1373904074265085, "s": 0.04123721842717426}, {"num": 11, "name": "インナーパッション", "color": "#e368a8", "text_color": "#fff", "style": "逃げ", "p_top3": 0.1373904074265085, "s": 0.04123721842717426}, {"num": 12, "name": "バッカステソーロ", "color": "#f07f2e", "text_color": "#fff", "style": "先行", "p_top3": 0.4789297658862876, "s": 0.1437489831864179}, {"num": 13, "name": "ブレスドナイル", "color": "#f07f2e", "text_color": "#fff", "style": "好位", "p_top3": 0.4789297658862876, "s": 0.1437489831864179}];
-var GEOM = {"straightHalf": 225, "ry": 58.75, "realOneLap": 2223, "distance": 1800, "turn": "左", "is_straight_course": false};
+var GEOM = {"straightHalf": 192.50000000000003, "ry": 60.375, "realOneLap": 2223, "distance": 1800, "turn": "左", "is_straight_course": false};
 (function(){
   var horses = HORSES;
   var styleBase = {"逃げ":0.97,"先行":0.80,"好位":0.60,"中団":0.38,"追込":0.15};
@@ -87,7 +87,12 @@ var GEOM = {"straightHalf": 225, "ry": 58.75, "realOneLap": 2223, "distance": 18
   tag.textContent="ゴール";
   var scale = len / GEOM.realOneLap;
   var raceDistSvg = GEOM.distance * scale;
-  var startFrac = ((goalFrac*len - raceDistSvg) % len + len) % len / len;
+  // ★過去バグ: レース距離が1周(len)より長い場合(例:中京芝2000m対1周1705.9m)、
+  //   従来はstartFracとgoalFracの差を"1周未満の弧(%1)"に丸めていたため、
+  //   実際は1周以上グルっと回るはずの距離が4角付近の短い弧に圧縮されてしまっていた。
+  //   周回数(lapsSpan)を%1で丸めず、実距離ぶんそのまま進める形に修正。
+  var lapsSpan = raceDistSvg / len; // 1周に満たない場合もあれば複数周のこともある
+  var startFrac = (((goalFrac * len - raceDistSvg) % len) + len) % len / len;
   var g=document.getElementById("horses");
   horses.forEach(function(h,i){
     var el=document.createElementNS("http://www.w3.org/2000/svg","g");
@@ -97,7 +102,7 @@ var GEOM = {"straightHalf": 225, "ry": 58.75, "realOneLap": 2223, "distance": 18
   });
   function drawTrialStrength(h){ var noise=-Math.log(-Math.log(Math.random())); return h.strength+noise; }
   var pace="M", paceShift={S:-0.04,M:0,H:0.04}, playing=false,t0=null,speedMult=1,raceDur=7000;
-  function pathFrac(progress){ var span=((goalFrac-startFrac)%1+1)%1; return (startFrac+span*progress)%1; }
+  function pathFrac(progress){ return (startFrac + lapsSpan*progress) % 1; }
   function place2(progress){
     var stretch = progress>0.8 ? (progress-0.8)/0.2 : 0;
     var order=[];

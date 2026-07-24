@@ -44,7 +44,7 @@
 </div>
 <script>
 var HORSES = [{"num": 1, "name": "シェリーシュシュ", "color": "#ffffff", "text_color": "#1a2e22", "style": "逃げ", "p_top3": 0.0321673953778888, "s": 0.010110163572619457}, {"num": 2, "name": "ミウ", "color": "#1a1a1a", "text_color": "#fff", "style": "先行", "p_top3": 0.1996966632962588, "s": 0.06276435835458671}, {"num": 3, "name": "ベアエクスプレス", "color": "#1a1a1a", "text_color": "#fff", "style": "好位", "p_top3": 0.0, "s": 0.0}, {"num": 4, "name": "マイトリックスター", "color": "#e2453f", "text_color": "#fff", "style": "中団", "p_top3": 0.2105263157894736, "s": 0.06616810170572818}, {"num": 5, "name": "ナツミカンチャン", "color": "#e2453f", "text_color": "#fff", "style": "追込", "p_top3": 0.2270311313591496, "s": 0.07135554020315907}, {"num": 6, "name": "ディレクティオ", "color": "#3b6ee0", "text_color": "#fff", "style": "逃げ", "p_top3": 0.0289532293986636, "s": 0.009099956080910252}, {"num": 7, "name": "ミュージックレイン", "color": "#3b6ee0", "text_color": "#fff", "style": "先行", "p_top3": 0.0289532293986636, "s": 0.009099956080910252}, {"num": 8, "name": "メジロピオラ", "color": "#f2b632", "text_color": "#1a2e22", "style": "好位", "p_top3": 0.294527896995708, "s": 0.09256967125703469}, {"num": 9, "name": "ゴールドビリーヴ", "color": "#f2b632", "text_color": "#1a2e22", "style": "中団", "p_top3": 0.6679920477137177, "s": 0.20994888732075986}, {"num": 10, "name": "ナックレジーナ", "color": "#2fa64d", "text_color": "#fff", "style": "追込", "p_top3": 0.1587163920208152, "s": 0.04988432125559776}, {"num": 11, "name": "オリエンタルガール", "color": "#2fa64d", "text_color": "#fff", "style": "逃げ", "p_top3": 0.0, "s": 0.0}, {"num": 12, "name": "カーボフリオ", "color": "#e368a8", "text_color": "#fff", "style": "先行", "p_top3": 0.6679245283018868, "s": 0.20992766607204147}, {"num": 13, "name": "アドバンスジェンヌ", "color": "#e368a8", "text_color": "#fff", "style": "好位", "p_top3": 0.0321673953778888, "s": 0.010110163572619457}, {"num": 14, "name": "バーヴァンシー", "color": "#f07f2e", "text_color": "#fff", "style": "中団", "p_top3": 0.5300353356890459, "s": 0.16658930199763727}, {"num": 15, "name": "アジャイブ", "color": "#f07f2e", "text_color": "#fff", "style": "追込", "p_top3": 0.1029973552747575, "s": 0.03237191252639558}];
-var GEOM = {"straightHalf": 225, "ry": 58.75, "realOneLap": 2223, "distance": 1800, "turn": "左", "is_straight_course": false};
+var GEOM = {"straightHalf": 192.50000000000003, "ry": 60.375, "realOneLap": 2223, "distance": 1800, "turn": "左", "is_straight_course": false};
 (function(){
   var horses = HORSES;
   var styleBase = {"逃げ":0.97,"先行":0.80,"好位":0.60,"中団":0.38,"追込":0.15};
@@ -87,7 +87,12 @@ var GEOM = {"straightHalf": 225, "ry": 58.75, "realOneLap": 2223, "distance": 18
   tag.textContent="ゴール";
   var scale = len / GEOM.realOneLap;
   var raceDistSvg = GEOM.distance * scale;
-  var startFrac = ((goalFrac*len - raceDistSvg) % len + len) % len / len;
+  // ★過去バグ: レース距離が1周(len)より長い場合(例:中京芝2000m対1周1705.9m)、
+  //   従来はstartFracとgoalFracの差を"1周未満の弧(%1)"に丸めていたため、
+  //   実際は1周以上グルっと回るはずの距離が4角付近の短い弧に圧縮されてしまっていた。
+  //   周回数(lapsSpan)を%1で丸めず、実距離ぶんそのまま進める形に修正。
+  var lapsSpan = raceDistSvg / len; // 1周に満たない場合もあれば複数周のこともある
+  var startFrac = (((goalFrac * len - raceDistSvg) % len) + len) % len / len;
   var g=document.getElementById("horses");
   horses.forEach(function(h,i){
     var el=document.createElementNS("http://www.w3.org/2000/svg","g");
@@ -97,7 +102,7 @@ var GEOM = {"straightHalf": 225, "ry": 58.75, "realOneLap": 2223, "distance": 18
   });
   function drawTrialStrength(h){ var noise=-Math.log(-Math.log(Math.random())); return h.strength+noise; }
   var pace="M", paceShift={S:-0.04,M:0,H:0.04}, playing=false,t0=null,speedMult=1,raceDur=7000;
-  function pathFrac(progress){ var span=((goalFrac-startFrac)%1+1)%1; return (startFrac+span*progress)%1; }
+  function pathFrac(progress){ return (startFrac + lapsSpan*progress) % 1; }
   function place2(progress){
     var stretch = progress>0.8 ? (progress-0.8)/0.2 : 0;
     var order=[];

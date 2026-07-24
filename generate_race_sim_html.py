@@ -312,16 +312,171 @@ def main():
         index_rows.append((race_id, place, surface, distance, race_name, fname))
         print(f"[OK] {race_id} {place} {race_name} -> {fname}")
 
-    index_html = ["<!doctype html><html lang='ja'><head><meta charset='utf-8'>",
-                  "<title>レースシミュレーション一覧</title>",
-                  "<style>body{font-family:sans-serif;background:#0f1a13;color:#fff;padding:20px}",
-                  "a{color:#5DCAA5;text-decoration:none;display:block;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.1)}</style></head><body>",
-                  f"<h2>レースシミュレーション一覧（{len(index_rows)}レース）</h2>"]
+    # 日付は基本1CSV=1日想定。複数日混在時は最大の日付をこの生成回のラベルにする。
+    dates_seen = sorted({str(r) for r in df["date"].dropna().unique()}) if "date" in df.columns else []
+    run_date = dates_seen[-1] if dates_seen else "unknown"
+
+    build_day_and_archive(index_rows, outdir, run_date)
+    print(f"[OK] {run_date}分のページ + アーカイブ一覧を生成（{len(index_rows)}レース）")
+
+
+NAV_CSS = """
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin:0; font-family:"Hiragino Sans","Yu Gothic",sans-serif; background:#0b1210; color:#fff;
+         -webkit-font-smoothing:antialiased; }
+  .nav { display:flex; align-items:center; justify-content:space-between; padding:14px 24px;
+         background:rgba(15,26,19,0.9); backdrop-filter:blur(6px); border-bottom:1px solid rgba(255,255,255,0.08);
+         position:sticky; top:0; z-index:10; }
+  .nav .brand { font-size:18px; font-weight:700; letter-spacing:0.02em; }
+  .nav .brand span { color:#5DCAA5; }
+  .nav-right { display:flex; align-items:center; gap:16px; }
+  .nav a.arclink { color:rgba(255,255,255,0.6); font-size:12px; text-decoration:none; }
+  .nav a.arclink:hover { color:#5DCAA5; }
+  .hero { padding:44px 24px 28px; background:radial-gradient(ellipse at top left,#16281f,#0b1210 70%); }
+  .hero .eyebrow { display:inline-block; font-size:11px; font-weight:700; letter-spacing:0.08em;
+                   color:#5DCAA5; background:rgba(93,202,165,0.12); border:1px solid rgba(93,202,165,0.3);
+                   padding:3px 10px; border-radius:20px; margin-bottom:12px; }
+  .hero h1 { margin:0 0 10px; font-size:28px; letter-spacing:0.01em; }
+  .hero p { margin:0; color:rgba(255,255,255,0.65); font-size:14px; line-height:1.8; max-width:640px; }
+  .about { padding:4px 24px 8px; }
+  .about-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; max-width:820px; }
+  .about-item { background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.07);
+                border-radius:12px; padding:14px 16px; }
+  .about-item .k { font-size:11px; color:rgba(255,255,255,0.45); margin-bottom:4px; }
+  .about-item .v { font-size:14px; font-weight:600; color:#5DCAA5; }
+  .content { padding:20px 24px 12px; }
+  .venue-block { margin-top:28px; }
+  .venue-title { font-size:16px; font-weight:700; color:#5DCAA5; margin-bottom:10px;
+                 display:flex; align-items:center; gap:8px; padding-bottom:6px;
+                 border-bottom:1px solid rgba(93,202,165,0.15); }
+  .venue-count { font-size:11px; font-weight:400; color:rgba(255,255,255,0.45); }
+  .card-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:10px; }
+  .card { display:flex; gap:10px; align-items:center; background:rgba(255,255,255,0.05);
+          border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:12px 14px;
+          text-decoration:none; color:#fff; transition:all 0.15s; }
+  .card:hover { background:rgba(93,202,165,0.12); border-color:rgba(93,202,165,0.4); transform:translateY(-1px); }
+  .card-rno { font-size:13px; font-weight:700; color:#5DCAA5; width:34px; flex-shrink:0; }
+  .card-name { font-size:13px; font-weight:500; }
+  .card-meta { font-size:11px; color:rgba(255,255,255,0.5); margin-top:2px; }
+  .datelink { display:block; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08);
+              border-radius:10px; padding:14px 16px; margin-bottom:10px; text-decoration:none; color:#fff;
+              transition:all 0.15s; }
+  .datelink:hover { background:rgba(93,202,165,0.12); border-color:rgba(93,202,165,0.4); transform:translateY(-1px); }
+  footer.disclaimer { margin-top:32px; padding:22px 24px 28px; border-top:1px solid rgba(255,255,255,0.08);
+                      color:rgba(255,255,255,0.45); font-size:11.5px; line-height:1.9; }
+  footer.disclaimer strong { color:rgba(255,255,255,0.65); }
+"""
+
+DISCLAIMER_HTML = """
+  <footer class="disclaimer">
+    <strong>ご利用にあたって</strong><br>
+    本サイトは機械学習モデルによる予想の参考情報を掲載しています。着順シミュレーションは予測モデルの複勝率をもとにした確率的な演出であり、実際のレース結果や的中を保証するものではありません。馬券の購入は必ずご自身の判断・責任で行ってください。20歳未満の方の馬券購入は法律で禁止されています。
+  </footer>"""
+
+
+def _format_date_label(d: str) -> str:
+    try:
+        y, m, dd = d.split("-")
+        return f"{y}年{int(m)}月{int(dd)}日"
+    except Exception:
+        return d
+
+
+def _day_content_html(index_rows, run_date, archive_link_html):
+    by_place = {}
     for race_id, place, surface, distance, race_name, fname in index_rows:
-        index_html.append(f"<a href='{fname}'>{place} {surface}{int(distance)}m {race_name}（{race_id}）</a>")
-    index_html.append("</body></html>")
-    (outdir / "index.html").write_text("\n".join(index_html), encoding="utf-8")
-    print(f"[OK] index.html 生成（{len(index_rows)}レース）")
+        by_place.setdefault(place, []).append((race_id, surface, distance, race_name, fname))
+
+    sections = []
+    for place, races in by_place.items():
+        cards = []
+        for race_id, surface, distance, race_name, fname in races:
+            rno = str(race_id)[-2:]
+            cards.append(f"""
+        <a class="card" href="{fname}">
+          <div class="card-rno">{int(rno)}R</div>
+          <div class="card-body">
+            <div class="card-name">{race_name}</div>
+            <div class="card-meta">{surface}{int(distance)}m</div>
+          </div>
+        </a>""")
+        sections.append(f"""
+      <div class="venue-block">
+        <div class="venue-title">{place}<span class="venue-count">{len(races)}レース</span></div>
+        <div class="card-grid">{''.join(cards)}</div>
+      </div>""")
+
+    n_venues = len(by_place)
+    return f"""<!doctype html><html lang="ja"><head><meta charset="utf-8">
+<title>競馬AI レースシミュレーション（{_format_date_label(run_date)}）</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>{NAV_CSS}</style></head>
+<body>
+  <div class="nav">
+    <div class="brand">競馬AI<span>レースシム</span></div>
+    <div class="nav-right">
+      <a class="arclink" href="archive/index.html">過去の予想を見る</a>
+      <span style="font-size:12px;color:rgba(255,255,255,0.5)">{len(index_rows)}レース掲載</span>
+    </div>
+  </div>
+  <div class="hero">
+    <span class="eyebrow">AI RACE SIMULATION</span>
+    <h1>レースシミュレーション（{_format_date_label(run_date)}）</h1>
+    <p>予測モデルが算出した複勝率をもとに、各馬の展開とゴールまでのシミュレーションを再現しています。実際の周回コース(直線距離・回り・高低差)をJRA全10場ぶん再現し、コースの特徴も反映しています。開催場ごとにレースを一覧表示しているので、気になるレースをタップして再生してみてください。{archive_link_html}</p>
+  </div>
+  <div class="about">
+    <div class="about-grid">
+      <div class="about-item"><div class="k">開催場数</div><div class="v">{n_venues}場</div></div>
+      <div class="about-item"><div class="k">掲載レース数</div><div class="v">{len(index_rows)}レース</div></div>
+      <div class="about-item"><div class="k">着順の決め方</div><div class="v">複勝率ベース抽選</div></div>
+      <div class="about-item"><div class="k">対象</div><div class="v">中央競馬 全場</div></div>
+    </div>
+  </div>
+  <div class="content">{''.join(sections)}</div>
+  {DISCLAIMER_HTML}
+</body></html>"""
+
+
+def build_day_and_archive(index_rows, outdir, run_date):
+    """当日分は docs/index.html（トップ）に反映しつつ、
+    docs/archive/<date>.html にも同じ内容を保存して過去分を消さずに残す。
+    docs/archive/index.html は archive/ 内の日付ファイルを走査して一覧化する。"""
+    archive_dir = outdir / "archive"
+    archive_dir.mkdir(exist_ok=True)
+
+    day_html = _day_content_html(index_rows, run_date, "")
+    (outdir / "index.html").write_text(day_html, encoding="utf-8")
+    (archive_dir / f"{run_date}.html").write_text(
+        _day_content_html(index_rows, run_date, "（このページはアーカイブです）"), encoding="utf-8"
+    )
+
+    # archive内の日付ファイルを走査してアーカイブ一覧を再構築（race_sim_*.htmlは対象外）
+    date_files = sorted(
+        (p.stem for p in archive_dir.glob("*.html") if p.stem != "index"),
+        reverse=True,
+    )
+    links = "\n".join(
+        f'<a class="datelink" href="{d}.html">{_format_date_label(d)}</a>' for d in date_files
+    )
+    archive_index = f"""<!doctype html><html lang="ja"><head><meta charset="utf-8">
+<title>競馬AI レースシミュレーション（過去分アーカイブ）</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>{NAV_CSS}</style></head>
+<body>
+  <div class="nav">
+    <div class="brand">競馬AI<span>レースシム</span></div>
+    <div class="nav-right"><a class="arclink" href="../index.html">最新に戻る</a></div>
+  </div>
+  <div class="hero">
+    <span class="eyebrow">ARCHIVE</span>
+    <h1>過去の予想アーカイブ</h1>
+    <p>日付ごとのレースシミュレーション一覧です。見たい日付を選んでください（全{len(date_files)}日分）。</p>
+  </div>
+  <div class="content">{links}</div>
+  {DISCLAIMER_HTML}
+</body></html>"""
+    (archive_dir / "index.html").write_text(archive_index, encoding="utf-8")
 
 
 if __name__ == "__main__":

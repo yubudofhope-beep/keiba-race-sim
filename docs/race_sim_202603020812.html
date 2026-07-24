@@ -1,0 +1,160 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8">
+<title>福島ダート1700m ３歳以上１勝クラス｜レースシミュレーション</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  body{margin:0;background:#0f1a13;font-family:"Hiragino Sans","Yu Gothic",sans-serif;display:flex;justify-content:center;padding:24px 10px}
+  .card{width:100%;max-width:520px;background:rgba(30,50,38,0.94);border-radius:16px;padding:20px;color:#fff}
+  .title{font-size:19px;font-weight:500;margin-bottom:2px}
+  .sub{font-size:12px;color:rgba(255,255,255,0.6);margin-bottom:12px}
+  .badge{background:rgba(20,30,24,0.55);padding:3px 8px;border-radius:4px;margin-bottom:3px;font-size:10px}
+  .pill{border-radius:2px;padding:0 4px;margin-right:4px;font-weight:500}
+  button{border:none;border-radius:10px;font-weight:500}
+  #playBtn{flex:1;height:46px;background:#e9e9e4;color:#1a2e22;font-size:15px}
+  .spdBtn{width:96px;height:46px;background:rgba(255,255,255,0.14);color:#fff;font-size:15px}
+  .resrow{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.08);border-radius:10px;padding:9px 14px;margin-bottom:6px}
+  .num{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500}
+  a.back{color:#5DCAA5;font-size:12px}
+</style></head>
+<body><div class="card">
+  <div style="display:flex;justify-content:space-between;align-items:center">
+    <div><div class="title">福島ダート1700m ３歳以上１勝クラス</div><div class="sub">2026-07-19｜福島｜ダート1700m｜右回り</div></div>
+    <a class="back" href="index.html">← 一覧</a>
+  </div>
+  <div style="position:relative;border-radius:12px;overflow:hidden;background:linear-gradient(180deg,#8fc98a,#6ba869);margin-top:10px">
+    <div style="position:absolute;top:8px;right:8px;font-size:10px;z-index:2">
+      <div class="badge"><span class="pill" style="background:#fff;color:#1a2e22">M</span>ペース想定</div>
+      <div class="badge"><span class="pill" style="background:#5DCAA5;color:#04342C">良</span>馬場 良</div>
+    </div>
+    <svg id="track" viewBox="0 0 620 300" style="width:100%;display:block">
+      <path id="trackOuter" fill="rgba(255,255,255,0.35)"/>
+      <path id="trackInner" fill="#7fc27d"/>
+      <line id="goalLine" stroke="#e2453f" stroke-width="4"/>
+      <text id="goalTag" font-size="10" fill="#8a2620" font-weight="600"></text>
+      <text id="progressLabel" x="290" y="150" text-anchor="middle" font-size="17" font-weight="500" fill="#1f3a26"></text>
+      <g id="horses"></g>
+    </svg>
+    <div style="position:absolute;bottom:6px;left:0;right:0;text-align:center;font-size:10px;color:#1f3a26">福島 ダート1700m（右回り）</div>
+  </div>
+  <div style="display:flex;gap:8px;margin:14px 0">
+    <button id="playBtn">走行中...</button>
+    <button class="spdBtn" id="spdBtn">速度 x2</button>
+  </div>
+  <div style="font-size:11px;color:rgba(255,255,255,0.55);text-align:center;margin-bottom:8px">※着順はwin_calib/top3_calib(較正済み予測確率)を反映したPlackett-Luce抽選（Gumbelノイズ）で試行ごとに決定</div>
+  <div id="results"></div>
+</div>
+<script>
+var HORSES = [{"num": 1, "name": "アルデキングダム", "color": "#ffffff", "text_color": "#1a2e22", "style": "逃げ", "p_top3": 0.1632566069906223, "s": 0.02042617391428123, "p_win": 0.0217260108630054}, {"num": 2, "name": "メリーサウンド", "color": "#1a1a1a", "text_color": "#fff", "style": "先行", "p_top3": 0.0876246966837422, "s": 0.04572545736482596, "p_win": 0.0486352357320099}, {"num": 3, "name": "ソナタン", "color": "#1a1a1a", "text_color": "#fff", "style": "好位", "p_top3": 0.1324479103204581, "s": 0.05327157973926619, "p_win": 0.0566615620214395}, {"num": 4, "name": "ジーティーブラック", "color": "#e2453f", "text_color": "#fff", "style": "中団", "p_top3": 0.4120553359683794, "s": 0.07803794177593813, "p_win": 0.0830039525691699}, {"num": 5, "name": "ノアチュロス", "color": "#e2453f", "text_color": "#fff", "style": "追込", "p_top3": 0.1324479103204581, "s": 0.03907205792319077, "p_win": 0.0415584415584415}, {"num": 6, "name": "サムシングニュー", "color": "#3b6ee0", "text_color": "#fff", "style": "逃げ", "p_top3": 0.4433299899699097, "s": 0.03907205792319077, "p_win": 0.0415584415584415}, {"num": 7, "name": "イサチルシーキング", "color": "#3b6ee0", "text_color": "#fff", "style": "先行", "p_top3": 0.1280467988300293, "s": 0.02042617391428123, "p_win": 0.0217260108630054}, {"num": 8, "name": "スーパーホース", "color": "#f2b632", "text_color": "#1a2e22", "style": "好位", "p_top3": 0.0017421602787456, "s": 0.004614338128965787, "p_win": 0.0049079754601227}, {"num": 9, "name": "キングプロフィット", "color": "#f2b632", "text_color": "#1a2e22", "style": "中団", "p_top3": 0.0342019543973941, "s": 0.01037112614553818, "p_win": 0.0110311015780603}, {"num": 10, "name": "ノーウェアマン", "color": "#2fa64d", "text_color": "#fff", "style": "追込", "p_top3": 0.1324479103204581, "s": 0.02042617391428123, "p_win": 0.0217260108630054}, {"num": 11, "name": "エアトベーレ", "color": "#2fa64d", "text_color": "#fff", "style": "逃げ", "p_top3": 0.3340874811463047, "s": 0.14430537671922652, "p_win": 0.1534883720930232}, {"num": 12, "name": "ウインドワンピース", "color": "#e368a8", "text_color": "#fff", "style": "先行", "p_top3": 0.0, "s": 0.0, "p_win": 0.0}, {"num": 13, "name": "カイトヴィント", "color": "#e368a8", "text_color": "#fff", "style": "好位", "p_top3": 0.1324479103204581, "s": 0.06976250204038215, "p_win": 0.0742018981880931}, {"num": 14, "name": "リポジノ", "color": "#f07f2e", "text_color": "#fff", "style": "中団", "p_top3": 0.3266666666666666, "s": 0.07842048298592028, "p_win": 0.0834108371143861}, {"num": 15, "name": "ヘルヴェティオス", "color": "#f07f2e", "text_color": "#fff", "style": "追込", "p_top3": 0.8278829604130808, "s": 0.37606855751071167, "p_win": 0.4}];
+var GEOM = {"straightHalf": 165.0, "ry": 61.75, "realOneLap": 1600, "distance": 1700, "turn": "右", "is_straight_course": false};
+(function(){
+  var horses = HORSES;
+  var styleBase = {"逃げ":0.97,"先行":0.80,"好位":0.60,"中団":0.38,"追込":0.15};
+  var styleKick  = {"逃げ":-0.05,"先行":0.0,"好位":0.06,"中団":0.12,"追込":0.22};
+  var cx=310, cy=150;
+  var straightHalf = GEOM.straightHalf, ry = GEOM.ry, thick = 28, rMid = ry+thick/2;
+  var mirror = GEOM.turn === "右"; // 右回り=時計回り想定でX反転して描画
+  function ovalPath(r){
+    var x1=cx-straightHalf,x2=cx+straightHalf;
+    return "M "+x1+" "+(cy-r)+" L "+x2+" "+(cy-r)+" A "+r+" "+r+" 0 0 1 "+x2+" "+(cy+r)+
+           " L "+x1+" "+(cy+r)+" A "+r+" "+r+" 0 0 1 "+x1+" "+(cy-r)+" Z";
+  }
+  document.getElementById("trackOuter").setAttribute("d", ovalPath(ry+thick));
+  document.getElementById("trackInner").setAttribute("d", ovalPath(ry));
+  var centerPath = document.createElementNS("http://www.w3.org/2000/svg","path");
+  centerPath.setAttribute("d", ovalPath(rMid));
+  document.getElementById("horses").appendChild(centerPath);
+  centerPath.style.display = "none";
+  var len = centerPath.getTotalLength();
+  var goalSideSign = mirror ? -1 : 1;
+  var goalPt = {x: cx - straightHalf*0.13*goalSideSign, y: cy + rMid};
+  var bestT=0,bestD=Infinity,samples=400;
+  for (var i=0;i<=samples;i++){
+    var t=i/samples*len, p=centerPath.getPointAtLength(t);
+    var d=(p.x-goalPt.x)*(p.x-goalPt.x)+(p.y-goalPt.y)*(p.y-goalPt.y);
+    if (d<bestD){bestD=d;bestT=t;}
+  }
+  var goalFrac = bestT/len;
+  var goalPtActual = centerPath.getPointAtLength(bestT);
+  var tang=centerPath.getPointAtLength(Math.min(len,bestT+1));
+  var tangPrev=centerPath.getPointAtLength(Math.max(0,bestT-1));
+  var dirx=tang.x-tangPrev.x, diry=tang.y-tangPrev.y, dl=Math.sqrt(dirx*dirx+diry*diry)||1;
+  var nx=-diry/dl, ny=dirx/dl;
+  document.getElementById("goalLine").setAttribute("x1", goalPtActual.x+nx*16);
+  document.getElementById("goalLine").setAttribute("y1", goalPtActual.y+ny*16);
+  document.getElementById("goalLine").setAttribute("x2", goalPtActual.x-nx*16);
+  document.getElementById("goalLine").setAttribute("y2", goalPtActual.y-ny*16);
+  var tag=document.getElementById("goalTag");
+  tag.setAttribute("x", goalPtActual.x-14); tag.setAttribute("y", goalPtActual.y+ny*16+14);
+  tag.textContent="ゴール";
+  var scale = len / GEOM.realOneLap;
+  var raceDistSvg = GEOM.distance * scale;
+  var startFrac = ((goalFrac*len - raceDistSvg) % len + len) % len / len;
+  var g=document.getElementById("horses");
+  horses.forEach(function(h,i){
+    var el=document.createElementNS("http://www.w3.org/2000/svg","g");
+    el.innerHTML='<circle r="9" fill="'+h.color+'" stroke="rgba(0,0,0,0.15)"></circle><text x="0" y="3.5" text-anchor="middle" font-size="9" font-weight="500" fill="'+h.text_color+'">'+h.num+'</text>';
+    g.appendChild(el); h.el=el;
+    h.strength = Math.log(Math.max(h.s,0.001)) - Math.log(Math.max(1-h.s,0.001));
+  });
+  function drawTrialStrength(h){ var noise=-Math.log(-Math.log(Math.random())); return h.strength+noise; }
+  var pace="M", paceShift={S:-0.04,M:0,H:0.04}, playing=false,t0=null,speedMult=1,raceDur=7000;
+  function pathFrac(progress){ var span=((goalFrac-startFrac)%1+1)%1; return (startFrac+span*progress)%1; }
+  function place2(progress){
+    var stretch = progress>0.8 ? (progress-0.8)/0.2 : 0;
+    var order=[];
+    horses.forEach(function(h,i){
+      var bias=1+paceShift[pace];
+      var styleOffset = styleBase[h.style] + styleKick[h.style]*Math.max(0,progress-0.55)/0.45;
+      var w = Math.max(0,progress-0.3)/0.7;
+      var combined = styleOffset*(1-w) + (h._trialNorm!==undefined?h._trialNorm:0.5)*w;
+      var pr=Math.max(0,Math.min(1,progress*bias));
+      var p=pathFrac(pr);
+      var pt=centerPath.getPointAtLength(p*len);
+      var pt2=centerPath.getPointAtLength(((p+0.003)%1)*len);
+      var nx2=-(pt2.y-pt.y), ny2=(pt2.x-pt.x), nl=Math.sqrt(nx2*nx2+ny2*ny2)||1;
+      var lead=combined*10;
+      var lx=pt.x+dirx/dl*lead, ly=pt.y+diry/dl*lead;
+      var spread = stretch>0 ? (i-3.5)*2.4 : (i-3.5)*1.1;
+      h.el.setAttribute("transform","translate("+(lx+nx2/nl*spread)+","+(ly+ny2/nl*spread)+")");
+      h._offset=combined; order.push(h);
+    });
+    order.sort(function(a,b){return b._offset-a._offset;});
+    var remain=Math.round((1-progress)*GEOM.distance/10)*10;
+    document.getElementById("progressLabel").textContent = progress>0.99?"ゴール":(progress<0.15?"テン争い ":"道中 ")+"残り約"+Math.max(remain,0)+"m";
+    return order;
+  }
+  function rollTrial(){
+    var vals=horses.map(function(h){return drawTrialStrength(h);});
+    var min=Math.min.apply(null,vals), max=Math.max.apply(null,vals);
+    horses.forEach(function(h,i){h._trialNorm=(vals[i]-min)/((max-min)||1);});
+  }
+  rollTrial(); place2(0);
+  function frame(ts){
+    if(!playing) return; if(!t0) t0=ts;
+    var progress=Math.min(1,((ts-t0)*speedMult)/raceDur);
+    place2(progress);
+    if(progress<1) requestAnimationFrame(frame); else finish();
+  }
+  function finish(){
+    playing=false;
+    var order=place2(1).slice(0,5);
+    var medals=["1着","2着","3着","4着","5着"];
+    document.getElementById("results").innerHTML = order.map(function(h,i){
+      return '<div class="resrow"><span style="color:#5DCAA5;font-weight:500;font-size:13px;width:32px">'+medals[i]+'</span>'+
+        '<span class="num" style="background:'+h.color+';color:'+h.text_color+'">'+h.num+'</span>'+
+        '<span style="font-size:13px;font-weight:500;flex:1">'+h.name+'</span>'+
+        '<span style="font-size:11px;color:rgba(255,255,255,0.55)">'+(h.p_win!==undefined?('勝率'+(h.p_win*100).toFixed(0)+'%・'):'')+'複勝率'+(h.p_top3*100).toFixed(0)+'%</span></div>';
+    }).join("");
+    document.getElementById("playBtn").textContent="▶ もう一回（別の試行）";
+  }
+  document.getElementById("playBtn").addEventListener("click", function(){
+    document.getElementById("results").innerHTML=""; rollTrial();
+    playing=true; t0=null; this.textContent="走行中...";
+    requestAnimationFrame(frame);
+  });
+  document.getElementById("spdBtn").addEventListener("click", function(){
+    speedMult = speedMult===1?2:1; this.textContent = speedMult===1?"速度 x2":"速度 x1";
+  });
+  document.getElementById("playBtn").click();
+})();
+</script>
+</body></html>

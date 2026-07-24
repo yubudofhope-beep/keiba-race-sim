@@ -1,0 +1,129 @@
+{
+  "_note": "JRA公式サイト・複数の競馬メディアで裏取りしたコースジオメトリ一覧。2026-07-24時点。地方場は対象外(中央競馬のみ)。",
+  "札幌": {
+    "turn": "右",
+    "one_lap_turf_m": 1640.9,
+    "one_lap_note": "芝Aコースで1周1640.9m",
+    "home_stretch_turf_m": 266.1,
+    "home_stretch_dirt_m": 264.3,
+    "slope": "特筆する起伏なし・ほぼ平坦",
+    "layout_note": "コーナー半径が大きく円形に近い形状",
+    "special_courses": [],
+    "verified": true,
+    "sources": ["https://www.jra.go.jp/facilities/race/sapporo/course/index.html"]
+  },
+  "函館": {
+    "turn": "右",
+    "one_lap_turf_m": null,
+    "home_stretch_turf_m": 262.1,
+    "home_stretch_dirt_m": 260.3,
+    "home_stretch_note": "JRA全場で最も短い直線",
+    "slope_m": 3.5,
+    "layout_note": "スタートは向正面直線→2コーナー奥ポケット。3コーナーまで約490mの緩い上り。3-4コーナーはスパイラルカーブで坂の頂上あり、直線半ばにかけて緩い下り坂",
+    "special_courses": [],
+    "verified": true,
+    "sources": ["https://www.jra.go.jp/facilities/race/hakodate/course/index.html"]
+  },
+  "福島": {
+    "turn": "右",
+    "one_lap_turf_m": 1600,
+    "one_lap_dirt_m": 1444.6,
+    "home_stretch_turf_m": 299.7,
+    "slope_max_m": 1.7,
+    "slope_note": "ゴール板通過後~2コーナーで下り1.7m、向正面で上り1.3m、4角~残り170m付近で再度下り、残り170m~50m付近で上り1.2mを駆け上がりゴール(全体の最大高低差は別途要確認だが区間別の起伏はこの通り)",
+    "layout_note": "3,4コーナーはスパイラルカーブ。JRA全場で最もコンパクト",
+    "special_courses": [],
+    "verified": true,
+    "sources": ["https://www.jra.go.jp/facilities/race/fukushima/course/index.html"]
+  },
+  "新潟": {
+    "turn": "左",
+    "one_lap_turf_outer_m": 2223,
+    "one_lap_note": "外回り芝は日本最長の1周2223m",
+    "home_stretch_m": 659,
+    "slope_m": 0.8,
+    "special_courses": [
+      {
+        "name": "芝1000m(直線コース)",
+        "type": "完全独立の直線コース",
+        "note": "2001年夏新設。日本唯一のオーバルを使わない直線専用コース。スタート~序盤に高低差1m弱の緩い起伏、残り2ハロン弱(約400m)は完全平坦。オーバルのゴール地点・ジオメトリとは一切共有しない別トラック。"
+      }
+    ],
+    "verified": true,
+    "sources": ["https://www.jra.go.jp/facilities/race/niigata/course/index.html"]
+  },
+  "東京": {
+    "turn": "左",
+    "one_lap_turf_m": 2083.1,
+    "home_stretch_m": null,
+    "slope_m": 2.0,
+    "slope_note": "直線に高低差2mの上り坂",
+    "special_courses": [],
+    "verified": true,
+    "sources": ["https://www.jra.go.jp/facilities/race/tokyo/course/"]
+  },
+  "中山": {
+    "turn": "右",
+    "one_lap_turf_m": null,
+    "home_stretch_dirt_m": 308,
+    "layout_note": "芝は内回り・外回りがあり、2コーナーで分岐、3コーナーで再合流",
+    "slope_m": 2.2,
+    "slope_max_grade_pct": 2.24,
+    "slope_note": "残り180m~70m地点にかけて高低差2.2m・最大勾配2.24%の名物急坂(JRA10場中、高低差・勾配ともに最大)。ゴール~1コーナーは上り、2コーナー手前で最高点、そこから内外回りとも下り坂がホームストレッチ半ばの最深部まで続く",
+    "special_courses": [],
+    "verified": true,
+    "sources": ["https://jra.jp/facilities/race/nakayama/course/"]
+  },
+  "中京": {
+    "turn": "左",
+    "one_lap_turf_m": null,
+    "one_lap_dirt_m": 1530,
+    "home_stretch_dirt_m": 410.7,
+    "slope_m": 3.5,
+    "slope_dirt_m": 3.4,
+    "slope_note": "ゴールからなだらかな上り→向正面半ばで最高点→直線入口手前で急坂(勾配約2%・高低差約2m)",
+    "special_courses": [],
+    "verified": true,
+    "sources": ["https://www.jra.go.jp/facilities/race/chukyo/course/index.html"]
+  },
+  "京都": {
+    "turn": "右",
+    "one_lap_turf_inner_m": 1782,
+    "home_stretch_turf_inner_m": 328,
+    "slope_inner_m": 3.1,
+    "one_lap_turf_outer_m": 1894,
+    "home_stretch_turf_outer_m": 403,
+    "slope_outer_m": 4.3,
+    "one_lap_dirt_m": 1607.6,
+    "home_stretch_dirt_m": 329.1,
+    "slope_note": "向正面~3コーナー入口にかけて高低差約4.3mの急勾配を上り、3~4コーナーで下り坂",
+    "layout_note": "内回り・外回りの2コース制",
+    "special_courses": [],
+    "verified": true,
+    "sources": ["https://www.jra.go.jp/facilities/race/kyoto/course/index.html"]
+  },
+  "阪神": {
+    "turn": "右",
+    "one_lap_turf_outer_m": 2089,
+    "one_lap_note": "外回り1周2089mでJRA最長",
+    "home_stretch_m": null,
+    "slope_m": 1.8,
+    "slope_note": "ゴール前に高低差1.8mの急坂",
+    "special_courses": [],
+    "verified": true,
+    "sources": ["https://www.jra.go.jp/facilities/race/hanshin/course/index.html"]
+  },
+  "小倉": {
+    "turn": "右",
+    "one_lap_turf_m": null,
+    "one_lap_dirt_m": 1445.4,
+    "home_stretch_turf_m": 293,
+    "home_stretch_dirt_m": 291.3,
+    "slope_turf_m": 3,
+    "slope_dirt_m": 2.9,
+    "layout_note": "2コーナー付近に小高い丘。平坦・小回り・スピード勝負のローカル場。芝幅員30mと広い",
+    "special_courses": [],
+    "verified": true,
+    "sources": ["https://www.jra.go.jp/facilities/race/kokura/course/"]
+  }
+}

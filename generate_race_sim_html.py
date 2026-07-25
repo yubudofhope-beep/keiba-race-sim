@@ -25,6 +25,16 @@ import pandas as pd
 HERE = Path(__file__).parent
 GEOM_PATH = HERE / "course_geometry.json"
 
+GA_SNIPPET = """<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-3D31T25KK1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-3D31T25KK1');
+</script>
+"""
+
 # 枠番の色（JRA公認の帽色に準拠した簡易パレット）
 FRAME_COLOR = {
     1: ("#ffffff", "#1a2e22"), 2: ("#1a1a1a", "#fff"), 3: ("#e2453f", "#fff"),
@@ -33,7 +43,7 @@ FRAME_COLOR = {
 }
 
 TEMPLATE = r"""<!doctype html><html lang="ja"><head><meta charset="utf-8">
-<title>{race_title}｜レースシミュレーション</title>
+""" + GA_SNIPPET.replace("{", "{{").replace("}", "}}") + r"""<title>{race_title}｜レースシミュレーション</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
   body{{margin:0;background:#0f1a13;font-family:"Hiragino Sans","Yu Gothic",sans-serif;display:flex;justify-content:center;padding:24px 10px}}
@@ -426,7 +436,7 @@ def _day_content_html(index_rows, run_date, archive_link_html):
 
     n_venues = len(by_place)
     return f"""<!doctype html><html lang="ja"><head><meta charset="utf-8">
-<title>競馬AI レースシミュレーション（{_format_date_label(run_date)}）</title>
+{GA_SNIPPET}<title>競馬AI レースシミュレーション（{_format_date_label(run_date)}）</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>{NAV_CSS}</style></head>
 <body>
@@ -477,7 +487,7 @@ def build_day_and_archive(index_rows, outdir, run_date):
         f'<a class="datelink" href="{d}.html">{_format_date_label(d)}</a>' for d in date_files
     )
     archive_index = f"""<!doctype html><html lang="ja"><head><meta charset="utf-8">
-<title>競馬AI レースシミュレーション（過去分アーカイブ）</title>
+{GA_SNIPPET}<title>競馬AI レースシミュレーション（過去分アーカイブ）</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>{NAV_CSS}</style></head>
 <body>

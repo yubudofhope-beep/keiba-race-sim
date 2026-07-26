@@ -62,7 +62,7 @@ TEMPLATE = r"""<!doctype html><html lang="ja"><head><meta charset="utf-8">
 <body><div class="card">
   <div style="display:flex;justify-content:space-between;align-items:center">
     <div><div class="title">{race_title}</div><div class="sub">{race_sub}</div></div>
-    <a class="back" href="index.html">← 一覧</a>
+    <a class="back" href="index.html?date={run_date}">← 一覧</a>
   </div>
   <div style="position:relative;border-radius:12px;overflow:hidden;background:linear-gradient(180deg,#8fc98a,#6ba869);margin-top:10px">
     <div style="position:absolute;top:8px;right:8px;font-size:10px;z-index:2">
@@ -333,6 +333,7 @@ def main():
             race_title=title, race_sub=sub, course_caption=caption,
             horses_json=json.dumps(horses, ensure_ascii=False),
             geom_json=json.dumps(geom, ensure_ascii=False),
+            run_date=date,
         )
         fname = f"race_sim_{safe_filename(race_id)}.html"
         (outdir / fname).write_text(html, encoding="utf-8")
@@ -343,37 +344,70 @@ def main():
     dates_seen = sorted({str(r) for r in df["date"].dropna().unique()}) if "date" in df.columns else []
     run_date = dates_seen[-1] if dates_seen else "unknown"
 
-    build_day_and_archive(index_rows, outdir, run_date)
-    print(f"[OK] {run_date}分のページ + アーカイブ一覧を生成（{len(index_rows)}レース）")
+    write_home_and_archive(index_rows, outdir, run_date)
+    print(f"[OK] {run_date}分のデータ登録 + トップ/アーカイブ シェルを更新（{len(index_rows)}レース）")
 
 
 NAV_CSS = """
   * { box-sizing: border-box; }
   html { scroll-behavior: smooth; }
   body { margin:0; font-family:"Hiragino Sans","Yu Gothic",sans-serif; background:#0b1210; color:#fff;
-         -webkit-font-smoothing:antialiased; }
+         -webkit-font-smoothing:antialiased; overflow-x:hidden; }
   .nav { display:flex; align-items:center; justify-content:space-between; padding:14px 24px;
          background:rgba(15,26,19,0.9); backdrop-filter:blur(6px); border-bottom:1px solid rgba(255,255,255,0.08);
          position:sticky; top:0; z-index:10; }
   .nav .brand { font-size:18px; font-weight:700; letter-spacing:0.02em; }
   .nav .brand span { color:#5DCAA5; }
   .nav-right { display:flex; align-items:center; gap:16px; }
-  .nav a.arclink { color:rgba(255,255,255,0.6); font-size:12px; text-decoration:none; }
+  .nav a.arclink { color:rgba(255,255,255,0.6); font-size:12px; text-decoration:none; transition:color 0.15s; }
   .nav a.arclink:hover { color:#5DCAA5; }
-  .hero { padding:44px 24px 28px; background:radial-gradient(ellipse at top left,#16281f,#0b1210 70%); }
+
+  /* ---- hero ---- */
+  .hero { position:relative; padding:48px 24px 30px; overflow:hidden;
+          background:radial-gradient(ellipse at top left,#17301f,#0b1210 68%); }
+  .hero::before { content:""; position:absolute; inset:0; z-index:0; pointer-events:none; opacity:0.35;
+          background-image:repeating-linear-gradient(115deg, rgba(93,202,165,0.10) 0px, rgba(93,202,165,0.10) 2px,
+          transparent 2px, transparent 46px);
+          animation: trackmove 14s linear infinite; }
+  @keyframes trackmove { 0%{ background-position:0 0; } 100%{ background-position:400px 0; } }
+  .hero > * { position:relative; z-index:1; }
   .hero .eyebrow { display:inline-block; font-size:11px; font-weight:700; letter-spacing:0.08em;
                    color:#5DCAA5; background:rgba(93,202,165,0.12); border:1px solid rgba(93,202,165,0.3);
-                   padding:3px 10px; border-radius:20px; margin-bottom:12px; }
-  .hero h1 { margin:0 0 10px; font-size:28px; letter-spacing:0.01em; }
-  .hero p { margin:0; color:rgba(255,255,255,0.65); font-size:14px; line-height:1.8; max-width:640px; }
+                   padding:3px 10px; border-radius:20px; margin-bottom:14px; }
+  .hero h1 { margin:0 0 14px; font-size:29px; letter-spacing:0.01em; font-weight:800; min-height:1.3em; }
+  .grad-text { background:linear-gradient(90deg,#5DCAA5,#8fe9c8,#5DCAA5,#4fb0e0);
+               background-size:300% 100%; -webkit-background-clip:text; background-clip:text;
+               color:transparent; animation:gradshift 6s ease-in-out infinite; }
+  @keyframes gradshift { 0%{background-position:0% 50%;} 50%{background-position:100% 50%;} 100%{background-position:0% 50%;} }
+  .hero p { margin:14px 0 0; color:rgba(255,255,255,0.65); font-size:14px; line-height:1.8; max-width:640px; }
+
+  /* ---- date switcher ---- */
+  .datebar { display:flex; align-items:center; gap:10px; margin-top:2px; }
+  .dbtn { width:34px; height:34px; border-radius:50%; border:1px solid rgba(93,202,165,0.35);
+          background:rgba(93,202,165,0.08); color:#5DCAA5; font-size:14px; cursor:pointer; transition:all 0.15s; }
+  .dbtn:hover:not(:disabled) { background:rgba(93,202,165,0.25); transform:scale(1.08); }
+  .dbtn:disabled { opacity:0.25; cursor:default; }
+  .dbtn:focus { outline:none; }
+  #dateLabel { font-size:13px; font-weight:600; color:rgba(255,255,255,0.85); min-width:150px; }
+
+  /* ---- stats ---- */
   .about { padding:4px 24px 8px; }
   .about-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; max-width:820px; }
   .about-item { background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.07);
-                border-radius:12px; padding:14px 16px; }
+                border-radius:12px; padding:14px 16px; transition:border-color 0.2s; }
+  .about-item:hover { border-color:rgba(93,202,165,0.35); }
   .about-item .k { font-size:11px; color:rgba(255,255,255,0.45); margin-bottom:4px; }
-  .about-item .v { font-size:14px; font-weight:600; color:#5DCAA5; }
+  .about-item .v { font-size:15px; font-weight:700; color:#5DCAA5; }
+
+  /* ---- skeleton loading ---- */
+  .skel { background:linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.11) 37%,
+          rgba(255,255,255,0.05) 63%); background-size:400% 100%; animation:shimmer 1.4s ease infinite;
+          border-radius:8px; }
+  @keyframes shimmer { 0%{background-position:100% 0;} 100%{background-position:-100% 0;} }
+
   .content { padding:20px 24px 12px; }
-  .venue-block { margin-top:28px; }
+  .venue-block { margin-top:28px; opacity:0; animation:fadeup 0.5s ease forwards; }
+  @keyframes fadeup { from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
   .venue-title { font-size:16px; font-weight:700; color:#5DCAA5; margin-bottom:10px;
                  display:flex; align-items:center; gap:8px; padding-bottom:6px;
                  border-bottom:1px solid rgba(93,202,165,0.15); }
@@ -381,15 +415,21 @@ NAV_CSS = """
   .card-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:10px; }
   .card { display:flex; gap:10px; align-items:center; background:rgba(255,255,255,0.05);
           border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:12px 14px;
-          text-decoration:none; color:#fff; transition:all 0.15s; }
-  .card:hover { background:rgba(93,202,165,0.12); border-color:rgba(93,202,165,0.4); transform:translateY(-1px); }
+          text-decoration:none; color:#fff; transition:all 0.18s; opacity:0; animation:fadeup 0.45s ease forwards; }
+  .card:hover { background:rgba(93,202,165,0.14); border-color:rgba(93,202,165,0.5); transform:translateY(-2px);
+                box-shadow:0 6px 18px rgba(93,202,165,0.15); }
   .card-rno { font-size:13px; font-weight:700; color:#5DCAA5; width:34px; flex-shrink:0; }
   .card-name { font-size:13px; font-weight:500; }
   .card-meta { font-size:11px; color:rgba(255,255,255,0.5); margin-top:2px; }
-  .datelink { display:block; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08);
-              border-radius:10px; padding:14px 16px; margin-bottom:10px; text-decoration:none; color:#fff;
-              transition:all 0.15s; }
-  .datelink:hover { background:rgba(93,202,165,0.12); border-color:rgba(93,202,165,0.4); transform:translateY(-1px); }
+  .datelink { display:flex; align-items:center; justify-content:space-between; background:rgba(255,255,255,0.05);
+              border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:14px 16px; margin-bottom:10px;
+              text-decoration:none; color:#fff; transition:all 0.18s; opacity:0; animation:fadeup 0.45s ease forwards; }
+  .datelink:hover { background:rgba(93,202,165,0.14); border-color:rgba(93,202,165,0.5); transform:translateY(-2px);
+                    box-shadow:0 6px 18px rgba(93,202,165,0.15); }
+  .datelink .arrow { color:#5DCAA5; font-size:13px; }
+  .errbox { padding:40px 24px; text-align:center; color:rgba(255,255,255,0.55); font-size:14px; }
+  .errbox a { color:#5DCAA5; }
+
   footer.disclaimer { margin-top:32px; padding:22px 24px 28px; border-top:1px solid rgba(255,255,255,0.08);
                       color:rgba(255,255,255,0.45); font-size:11.5px; line-height:1.9; }
   footer.disclaimer strong { color:rgba(255,255,255,0.65); }
@@ -410,86 +450,142 @@ def _format_date_label(d: str) -> str:
         return d
 
 
-def _day_content_html(index_rows, run_date, archive_link_html):
-    by_place = {}
-    for race_id, place, surface, distance, race_name, fname in index_rows:
-        by_place.setdefault(place, []).append((race_id, surface, distance, race_name, fname))
+# ============================================================================
+# ★2026-07-26設計変更: 「静的シェル + JSONデータ」方式に刷新。
+# 理由: 以前はdocs/index.htmlの中身(日付・レース一覧)を毎日まるごと書き換えていたため、
+#   Google Sites側の埋め込み(URL埋め込み)がページの見た目を古いままキャッシュしてしまう
+#   不具合が繰り返し発生していた(参考: BoatAI姉妹サイトは同じ埋め込み方式でも一度もこの
+#   問題が起きていない → 調査の結果、BoatAI側はトップページのHTML自体は不変で、日付ごとの
+#   データを小さいJSON経由でJSが取得・描画する構造だった)。
+#   同じ構造にすることで、docs/index.html / docs/archive/index.html は生成のたびに
+#   "同一内容"になり(=Googleのスナップショットが古くても実害が出ない)、実際に変化するのは
+#   docs/data/*.json だけになる。
+# ============================================================================
 
-    sections = []
-    for place, races in by_place.items():
-        cards = []
-        for race_id, surface, distance, race_name, fname in races:
-            rno = str(race_id)[-2:]
-            cards.append(f"""
-        <a class="card" href="{fname}">
-          <div class="card-rno">{int(rno)}R</div>
-          <div class="card-body">
-            <div class="card-name">{race_name}</div>
-            <div class="card-meta">{surface}{int(distance)}m</div>
-          </div>
-        </a>""")
-        sections.append(f"""
-      <div class="venue-block">
-        <div class="venue-title">{place}<span class="venue-count">{len(races)}レース</span></div>
-        <div class="card-grid">{''.join(cards)}</div>
-      </div>""")
-
-    n_venues = len(by_place)
-    return f"""<!doctype html><html lang="ja"><head><meta charset="utf-8">
-{GA_SNIPPET}<title>競馬AI レースシミュレーション（{_format_date_label(run_date)}）</title>
+INDEX_SHELL = """<!doctype html><html lang="ja"><head><meta charset="utf-8">
+""" + GA_SNIPPET + """<title>競馬AI レースシミュレーション</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<style>{NAV_CSS}</style></head>
+<style>""" + NAV_CSS + """</style></head>
 <body>
   <div class="nav">
     <div class="brand">競馬AI<span>レースシム</span></div>
     <div class="nav-right">
       <a class="arclink" href="archive/index.html">過去の予想を見る</a>
-      <span style="font-size:12px;color:rgba(255,255,255,0.5)">{len(index_rows)}レース掲載</span>
+      <span id="navCount" style="font-size:12px;color:rgba(255,255,255,0.5)"></span>
     </div>
   </div>
   <div class="hero">
     <span class="eyebrow">AI RACE SIMULATION</span>
-    <h1>レースシミュレーション（{_format_date_label(run_date)}）</h1>
-    <p>予測モデルが算出した複勝率をもとに、各馬の展開とゴールまでのシミュレーションを再現しています。実際の周回コース(直線距離・回り・高低差)をJRA全10場ぶん再現し、コースの特徴も反映しています。開催場ごとにレースを一覧表示しているので、気になるレースをタップして再生してみてください。{archive_link_html}</p>
+    <h1 id="heroTitle" class="grad-text">読み込み中…</h1>
+    <div class="datebar">
+      <button class="dbtn" id="prevBtn" disabled>&#9664;</button>
+      <span id="dateLabel">--</span>
+      <button class="dbtn" id="nextBtn" disabled>&#9654;</button>
+    </div>
+    <p>予測モデルが算出した複勝率をもとに、各馬の展開とゴールまでのシミュレーションを再現しています。実際の周回コース(直線距離・回り・高低差)をJRA全10場ぶん再現し、コースの特徴も反映しています。開催場ごとにレースを一覧表示しているので、気になるレースをタップして再生してみてください。</p>
   </div>
   <div class="about">
-    <div class="about-grid">
-      <div class="about-item"><div class="k">開催場数</div><div class="v">{n_venues}場</div></div>
-      <div class="about-item"><div class="k">掲載レース数</div><div class="v">{len(index_rows)}レース</div></div>
+    <div class="about-grid" id="statsGrid">
+      <div class="about-item"><div class="k">開催場数</div><div class="v skel">&nbsp;</div></div>
+      <div class="about-item"><div class="k">掲載レース数</div><div class="v skel">&nbsp;</div></div>
       <div class="about-item"><div class="k">着順の決め方</div><div class="v">複勝率ベース抽選</div></div>
       <div class="about-item"><div class="k">対象</div><div class="v">中央競馬 全場</div></div>
     </div>
   </div>
-  <div class="content">{''.join(sections)}</div>
-  {DISCLAIMER_HTML}
+  <div class="content" id="raceContent">
+    <div class="venue-block" style="animation-delay:0s">
+      <div class="skel" style="height:20px;width:120px;margin-bottom:12px"></div>
+      <div class="card-grid">
+        <div class="skel" style="height:56px"></div><div class="skel" style="height:56px"></div>
+        <div class="skel" style="height:56px"></div><div class="skel" style="height:56px"></div>
+      </div>
+    </div>
+  </div>
+  """ + DISCLAIMER_HTML + """
+<script>
+(function(){
+  var params = new URLSearchParams(location.search);
+  var reqDate = params.get('date');
+
+  function showError(msg){
+    document.getElementById('raceContent').innerHTML =
+      '<div class="errbox">'+msg+'<br><br><a href="index.html">最新のシミュレーションに戻る</a></div>';
+    document.getElementById('heroTitle').textContent = '競馬AI レースシミュレーション';
+  }
+
+  function animateCount(el, target){
+    var start = 0, dur = 700, t0 = null;
+    function step(ts){
+      if(!t0) t0 = ts;
+      var p = Math.min(1, (ts - t0) / dur);
+      el.textContent = Math.round(start + (target - start) * p) + (el.dataset.suffix||'');
+      if(p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  function render(data, dates){
+    document.getElementById('heroTitle').innerHTML =
+      'レースシミュレーション（<span class="grad-text">' + data.date_label + '</span>）';
+    document.getElementById('dateLabel').textContent = data.date_label;
+    document.getElementById('navCount').textContent = data.venues.reduce(function(a,v){return a+v.races.length;},0) + 'レース掲載';
+
+    var statsGrid = document.getElementById('statsGrid');
+    var totalRaces = data.venues.reduce(function(a,v){return a+v.races.length;},0);
+    var vEl = statsGrid.children[0].querySelector('.v');
+    var rEl = statsGrid.children[1].querySelector('.v');
+    vEl.classList.remove('skel'); rEl.classList.remove('skel');
+    vEl.dataset.suffix = '場'; rEl.dataset.suffix = 'レース';
+    animateCount(vEl, data.venues.length);
+    animateCount(rEl, totalRaces);
+
+    var html = '';
+    data.venues.forEach(function(v, vi){
+      html += '<div class="venue-block" style="animation-delay:'+(vi*0.06)+'s">' +
+        '<div class="venue-title">' + v.place + '<span class="venue-count">' + v.races.length + 'レース</span></div>' +
+        '<div class="card-grid">';
+      v.races.forEach(function(r, ri){
+        html += '<a class="card" href="' + r.file + '" style="animation-delay:' + ((vi*0.06)+(ri*0.03)) + 's">' +
+          '<div class="card-rno">' + r.rno + 'R</div>' +
+          '<div class="card-body"><div class="card-name">' + r.name + '</div>' +
+          '<div class="card-meta">' + r.surface + r.distance + 'm</div></div></a>';
+      });
+      html += '</div></div>';
+    });
+    document.getElementById('raceContent').innerHTML = html;
+
+    var idx = dates.indexOf(data.date);
+    var prevBtn = document.getElementById('prevBtn'), nextBtn = document.getElementById('nextBtn');
+    // dates は新しい日付が先頭(降順)。「次」=より新しい日付、「前」=より古い日付。
+    if (idx >= 0 && idx < dates.length - 1) {
+      prevBtn.disabled = false;
+      prevBtn.onclick = function(){ location.search = '?date=' + dates[idx+1]; };
+    }
+    if (idx > 0) {
+      nextBtn.disabled = false;
+      nextBtn.onclick = function(){ location.search = '?date=' + dates[idx-1]; };
+    }
+  }
+
+  fetch('data/manifest.json').then(function(r){ return r.json(); }).then(function(manifest){
+    var dates = manifest.dates || [];
+    if (!dates.length) { showError('データがまだありません。'); return; }
+    var date = (reqDate && dates.indexOf(reqDate) >= 0) ? reqDate : dates[0];
+    return fetch('data/day_' + date + '.json').then(function(r){
+      if (!r.ok) throw new Error('not found');
+      return r.json();
+    }).then(function(data){ render(data, dates); });
+  }).catch(function(){
+    showError('データの読み込みに失敗しました。時間をおいて再度お試しください。');
+  });
+})();
+</script>
 </body></html>"""
 
-
-def build_day_and_archive(index_rows, outdir, run_date):
-    """当日分は docs/index.html（トップ）に反映しつつ、
-    docs/archive/<date>.html にも同じ内容を保存して過去分を消さずに残す。
-    docs/archive/index.html は archive/ 内の日付ファイルを走査して一覧化する。"""
-    archive_dir = outdir / "archive"
-    archive_dir.mkdir(exist_ok=True)
-
-    day_html = _day_content_html(index_rows, run_date, "")
-    (outdir / "index.html").write_text(day_html, encoding="utf-8")
-    (archive_dir / f"{run_date}.html").write_text(
-        _day_content_html(index_rows, run_date, "（このページはアーカイブです）"), encoding="utf-8"
-    )
-
-    # archive内の日付ファイルを走査してアーカイブ一覧を再構築（race_sim_*.htmlは対象外）
-    date_files = sorted(
-        (p.stem for p in archive_dir.glob("*.html") if p.stem != "index"),
-        reverse=True,
-    )
-    links = "\n".join(
-        f'<a class="datelink" href="{d}.html">{_format_date_label(d)}</a>' for d in date_files
-    )
-    archive_index = f"""<!doctype html><html lang="ja"><head><meta charset="utf-8">
-{GA_SNIPPET}<title>競馬AI レースシミュレーション（過去分アーカイブ）</title>
+ARCHIVE_SHELL = """<!doctype html><html lang="ja"><head><meta charset="utf-8">
+""" + GA_SNIPPET + """<title>競馬AI レースシミュレーション（過去分アーカイブ）</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<style>{NAV_CSS}</style></head>
+<style>""" + NAV_CSS + """</style></head>
 <body>
   <div class="nav">
     <div class="brand">競馬AI<span>レースシム</span></div>
@@ -497,13 +593,80 @@ def build_day_and_archive(index_rows, outdir, run_date):
   </div>
   <div class="hero">
     <span class="eyebrow">ARCHIVE</span>
-    <h1>過去の予想アーカイブ</h1>
-    <p>日付ごとのレースシミュレーション一覧です。見たい日付を選んでください（全{len(date_files)}日分）。</p>
+    <h1 class="grad-text">過去の予想アーカイブ</h1>
+    <p id="archiveSub">読み込み中…</p>
   </div>
-  <div class="content">{links}</div>
-  {DISCLAIMER_HTML}
+  <div class="content" id="archiveList">
+    <div class="skel" style="height:52px;margin-bottom:10px"></div>
+    <div class="skel" style="height:52px;margin-bottom:10px"></div>
+    <div class="skel" style="height:52px;margin-bottom:10px"></div>
+  </div>
+  """ + DISCLAIMER_HTML + """
+<script>
+(function(){
+  function fmt(d){
+    var m = d.match(/^(\\d{4})-(\\d{2})-(\\d{2})$/);
+    return m ? (m[1]+'年'+parseInt(m[2],10)+'月'+parseInt(m[3],10)+'日') : d;
+  }
+  fetch('../data/manifest.json').then(function(r){ return r.json(); }).then(function(manifest){
+    var dates = manifest.dates || [];
+    document.getElementById('archiveSub').textContent =
+      '日付ごとのレースシミュレーション一覧です。見たい日付を選んでください（全' + dates.length + '日分）。';
+    var html = dates.map(function(d, i){
+      return '<a class="datelink" href="../index.html?date=' + d + '" style="animation-delay:' + (i*0.03) + 's">' +
+        '<span>' + fmt(d) + '</span><span class="arrow">見る →</span></a>';
+    }).join('');
+    document.getElementById('archiveList').innerHTML = html || '<div class="errbox">まだデータがありません。</div>';
+  }).catch(function(){
+    document.getElementById('archiveSub').textContent = '読み込みに失敗しました。';
+    document.getElementById('archiveList').innerHTML = '';
+  });
+})();
+</script>
 </body></html>"""
-    (archive_dir / "index.html").write_text(archive_index, encoding="utf-8")
+
+
+def write_home_and_archive(index_rows, outdir, run_date):
+    """docs/index.html と docs/archive/index.html は"不変の静的シェル"として1回書けば
+    以後内容が変わらない(常に同一バイト列)。実際に変化するのは docs/data/*.json のみ。
+    これにより、Googleサイト埋め込みが古いHTMLスナップショットをキャッシュしても、
+    そのスナップショット自身のJSが実行時にJSONを取りに行くため最新表示になる
+    (BoatAI姉妹サイトと同じ構造)。"""
+    data_dir = outdir / "data"
+    data_dir.mkdir(exist_ok=True)
+    (outdir / "archive").mkdir(exist_ok=True)
+
+    # 1. 当日分データJSON
+    by_place = {}
+    for race_id, place, surface, distance, race_name, fname in index_rows:
+        by_place.setdefault(place, []).append(
+            {"race_id": str(race_id), "rno": int(str(race_id)[-2:]),
+             "name": race_name, "surface": surface, "distance": int(distance), "file": fname}
+        )
+    day_data = {
+        "date": run_date,
+        "date_label": _format_date_label(run_date),
+        "venues": [{"place": place, "races": races} for place, races in by_place.items()],
+    }
+    (data_dir / f"day_{run_date}.json").write_text(
+        json.dumps(day_data, ensure_ascii=False, indent=1), encoding="utf-8")
+
+    # 2. manifest.json (既存日付一覧 + 今回分。降順ソート)
+    manifest_path = data_dir / "manifest.json"
+    dates = []
+    if manifest_path.exists():
+        try:
+            dates = json.loads(manifest_path.read_text(encoding="utf-8")).get("dates", [])
+        except Exception:
+            dates = []
+    if run_date not in dates:
+        dates.append(run_date)
+    dates = sorted(set(dates), reverse=True)
+    manifest_path.write_text(json.dumps({"dates": dates}, ensure_ascii=False, indent=1), encoding="utf-8")
+
+    # 3. シェル本体(index.html / archive/index.html)は常に同一内容で上書き
+    (outdir / "index.html").write_text(INDEX_SHELL, encoding="utf-8")
+    (outdir / "archive" / "index.html").write_text(ARCHIVE_SHELL, encoding="utf-8")
 
 
 if __name__ == "__main__":

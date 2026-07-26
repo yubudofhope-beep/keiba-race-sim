@@ -40,8 +40,11 @@
     "turn": "左",
     "one_lap_turf_outer_m": 2223,
     "one_lap_note": "外回り芝は日本最長の1周2223m",
-    "home_stretch_m": 659,
+    "home_stretch_turf_m": 659,
+    "home_stretch_dirt_m": 350,
     "slope_m": 0.8,
+    "slope_dirt_m": 0.6,
+    "home_stretch_note": "659mは芝外回りの値。ダートは約350mと大きく異なる（JRAダートで最小の高低差0.6m）",
     "special_courses": [
       {
         "name": "芝1000m(直線コース)",
@@ -76,8 +79,9 @@
   },
   "中京": {
     "turn": "左",
-    "one_lap_turf_m": null,
+    "one_lap_turf_m": 1705.9,
     "one_lap_dirt_m": 1530,
+    "home_stretch_turf_m": 412.5,
     "home_stretch_dirt_m": 410.7,
     "slope_m": 3.5,
     "slope_dirt_m": 3.4,

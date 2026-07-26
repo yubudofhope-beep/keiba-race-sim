@@ -77,15 +77,17 @@
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
-var HORSES = [{"num": 1, "name": "ジャストワナフライ", "color": "#ffffff", "text_color": "#1a2e22", "style": "逃げ", "p_top3": 0.3014769765421373, "s": 0.08839897926260432}, {"num": 2, "name": "サトノフルーク", "color": "#1a1a1a", "text_color": "#fff", "style": "先行", "p_top3": 0.3390681003584229, "s": 0.09942143614408151}, {"num": 3, "name": "コスモトップ", "color": "#e2453f", "text_color": "#fff", "style": "好位", "p_top3": 0.3954864964853866, "s": 0.1159644195800315}, {"num": 4, "name": "リアライズセレスト", "color": "#3b6ee0", "text_color": "#fff", "style": "中団", "p_top3": 0.3954864964853866, "s": 0.1159644195800315}, {"num": 5, "name": "ローザベッラ", "color": "#f2b632", "text_color": "#1a2e22", "style": "追込", "p_top3": 0.3610431947840262, "s": 0.10586496605705703}, {"num": 6, "name": "レゾンフォルテ", "color": "#2fa64d", "text_color": "#fff", "style": "逃げ", "p_top3": 0.4789297658862876, "s": 0.1404316274112178}, {"num": 7, "name": "マイネルラビリンス", "color": "#e368a8", "text_color": "#fff", "style": "先行", "p_top3": 0.1996966632962588, "s": 0.058554989505375736}, {"num": 8, "name": "ミラマルニ", "color": "#e368a8", "text_color": "#fff", "style": "好位", "p_top3": 0.2462845010615711, "s": 0.07221545987276978}, {"num": 9, "name": "ノヴァヴェローチェ", "color": "#f07f2e", "text_color": "#fff", "style": "中団", "p_top3": 0.4659090909090909, "s": 0.13661370940468823}, {"num": 10, "name": "サンライズジャポネ", "color": "#f07f2e", "text_color": "#fff", "style": "追込", "p_top3": 0.2270311313591496, "s": 0.06656999318214266}];
+var HORSES = [{"num": 1, "name": "ジャストワナフライ", "color": "#ffffff", "text_color": "#1a2e22", "style": "中団", "pos": 0.5, "styleKnown": false, "p_top3": 0.3014769765421373, "s": 0.08839897926260432}, {"num": 2, "name": "サトノフルーク", "color": "#1a1a1a", "text_color": "#fff", "style": "中団", "pos": 0.5, "styleKnown": false, "p_top3": 0.3390681003584229, "s": 0.09942143614408151}, {"num": 3, "name": "コスモトップ", "color": "#e2453f", "text_color": "#fff", "style": "中団", "pos": 0.5, "styleKnown": false, "p_top3": 0.3954864964853866, "s": 0.1159644195800315}, {"num": 4, "name": "リアライズセレスト", "color": "#3b6ee0", "text_color": "#fff", "style": "中団", "pos": 0.5, "styleKnown": false, "p_top3": 0.3954864964853866, "s": 0.1159644195800315}, {"num": 5, "name": "ローザベッラ", "color": "#f2b632", "text_color": "#1a2e22", "style": "中団", "pos": 0.5, "styleKnown": false, "p_top3": 0.3610431947840262, "s": 0.10586496605705703}, {"num": 6, "name": "レゾンフォルテ", "color": "#2fa64d", "text_color": "#fff", "style": "中団", "pos": 0.5, "styleKnown": false, "p_top3": 0.4789297658862876, "s": 0.1404316274112178}, {"num": 7, "name": "マイネルラビリンス", "color": "#e368a8", "text_color": "#fff", "style": "中団", "pos": 0.5, "styleKnown": false, "p_top3": 0.1996966632962588, "s": 0.058554989505375736}, {"num": 8, "name": "ミラマルニ", "color": "#e368a8", "text_color": "#fff", "style": "中団", "pos": 0.5, "styleKnown": false, "p_top3": 0.2462845010615711, "s": 0.07221545987276978}, {"num": 9, "name": "ノヴァヴェローチェ", "color": "#f07f2e", "text_color": "#fff", "style": "中団", "pos": 0.5, "styleKnown": false, "p_top3": 0.4659090909090909, "s": 0.13661370940468823}, {"num": 10, "name": "サンライズジャポネ", "color": "#f07f2e", "text_color": "#fff", "style": "中団", "pos": 0.5, "styleKnown": false, "p_top3": 0.2270311313591496, "s": 0.06656999318214266}];
 var GEOM = {"straightHalf": 111.762, "ry": 40, "realOneLap": 1640.9, "distance": 1800, "turn": "右", "is_straight_course": false, "surface": "芝", "elevM": 0.0, "lane": null};
 (function(){
   var horses = HORSES;
-  var styleBase = {"逃げ":0.97,"先行":0.80,"好位":0.60,"中団":0.38,"追込":0.15};
-  var styleKick  = {"逃げ":-0.05,"先行":0.0,"好位":0.06,"中団":0.12,"追込":0.22};
-  // 脚質ごとの道中の定位置(+1=最内ラチ沿い / -1=最外)。
-  // 逃げ・先行はロスを避けて内へ、差し・追込は前が壁にならないよう外めを回る。
-  var styleLane = {"逃げ":0.78,"先行":0.48,"好位":0.12,"中団":-0.18,"追込":-0.42};
+  // ★脚質は h.pos(DBのrun_style_avg: 0=前で運ぶ / 1=後ろから)の連続値で扱う。
+  //   以前は馬番順に逃げ→先行→…と機械的に割り当てた見た目だけの値だった。
+  function baseOf(h){ return 0.97 - 0.82*h.pos; }   // 道中の前後位置
+  function kickOf(h){ return -0.05 + 0.27*h.pos; }  // 終いの伸び(後ろの馬ほど末脚)
+  // 道中の横位置(+1=最内ラチ沿い / -1=最外)。前で運ぶ馬はロスを避けて内、
+  // 差し・追込は前が壁にならないよう外めを回る。
+  function laneOf(h){ return 0.78 - 1.20*h.pos; }
   var cx=410, cy=150;   // viewBox 820x300 の中心
   // ★コース幅(thick)。馬マーカーの直径に対しコース幅が十分広くないと
   //   馬群が横に広がれず常に団子に見える。実写に近い比率(マーカー径 ≒ コース幅の1割)
@@ -645,7 +647,7 @@ var GEOM = {"straightHalf": 111.762, "ry": 40, "realOneLap": 1640.9, "distance":
     var order=[];
     horses.forEach(function(h,i){
       var bias=1+paceShift[pace];
-      var styleOffset = styleBase[h.style] + styleKick[h.style]*Math.max(0,progress-0.55)/0.45;
+      var styleOffset = baseOf(h) + kickOf(h)*Math.max(0,progress-0.55)/0.45;
       var w = Math.max(0,progress-0.3)/0.7;
       var combined = styleOffset*(1-w) + (h._trialNorm!==undefined?h._trialNorm:0.5)*w;
       var pr=Math.max(0,Math.min(1,progress*bias));
@@ -666,7 +668,7 @@ var GEOM = {"straightHalf": 111.762, "ry": 40, "realOneLap": 1640.9, "distance":
       //   という3段階で横位置を作る。この垂直方向は正が内ラチ側。
       var mid=(horses.length-1)/2;
       var laneHome = (mid-i)/Math.max(1,mid);              // +1=最内枠, -1=最外枠
-      var tgt = (styleLane[h.style]!==undefined?styleLane[h.style]:0) + (h._laneJit||0);
+      var tgt = laneOf(h) + (h._laneJit||0);
       var w1 = Math.max(0, Math.min(1, (progress-0.08)/0.27));  // 枠順→脚質の位置取りへ
       var lane = laneHome*(1-w1) + tgt*w1;
       lane += (h._laneOut||0)*stretch;                     // 直線で外に持ち出す馬
@@ -759,7 +761,9 @@ var GEOM = {"straightHalf": 111.762, "ry": 40, "realOneLap": 1640.9, "distance":
     document.getElementById("results").innerHTML = order.map(function(h,i){
       return '<div class="resrow"><span style="color:#5DCAA5;font-weight:500;font-size:13px;width:32px">'+medals[i]+'</span>'+
         '<span class="num" style="background:'+h.color+';color:'+h.text_color+'">'+h.num+'</span>'+
-        '<span style="font-size:13px;font-weight:500;flex:1">'+h.name+'</span>'+
+        '<span style="font-size:13px;font-weight:500;flex:1">'+h.name+
+          '<span style="font-size:10px;color:rgba(255,255,255,0.45);margin-left:6px">'+
+          (h.styleKnown?h.style:'脚質不明')+'</span></span>'+
         '<span style="font-size:11px;color:rgba(255,255,255,0.55)">'+(h.p_win!==undefined?('勝率'+(h.p_win*100).toFixed(0)+'%・'):'')+'複勝率'+(h.p_top3*100).toFixed(0)+'%</span></div>';
     }).join("");
     document.getElementById("playBtn").textContent="▶ もう一回（別の試行）";

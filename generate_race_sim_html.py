@@ -18,6 +18,7 @@ predict_sisueos(_v3).py が出力する pred_YYYYMMDD.csv から、レースご�
 import argparse
 import json
 import re
+import sqlite3
 from pathlib import Path
 
 import pandas as pd
@@ -117,11 +118,13 @@ var HORSES = {horses_json};
 var GEOM = {geom_json};
 (function(){{
   var horses = HORSES;
-  var styleBase = {{"逃げ":0.97,"先行":0.80,"好位":0.60,"中団":0.38,"追込":0.15}};
-  var styleKick  = {{"逃げ":-0.05,"先行":0.0,"好位":0.06,"中団":0.12,"追込":0.22}};
-  // 脚質ごとの道中の定位置(+1=最内ラチ沿い / -1=最外)。
-  // 逃げ・先行はロスを避けて内へ、差し・追込は前が壁にならないよう外めを回る。
-  var styleLane = {{"逃げ":0.78,"先行":0.48,"好位":0.12,"中団":-0.18,"追込":-0.42}};
+  // ★脚質は h.pos(DBのrun_style_avg: 0=前で運ぶ / 1=後ろから)の連続値で扱う。
+  //   以前は馬番順に逃げ→先行→…と機械的に割り当てた見た目だけの値だった。
+  function baseOf(h){{ return 0.97 - 0.82*h.pos; }}   // 道中の前後位置
+  function kickOf(h){{ return -0.05 + 0.27*h.pos; }}  // 終いの伸び(後ろの馬ほど末脚)
+  // 道中の横位置(+1=最内ラチ沿い / -1=最外)。前で運ぶ馬はロスを避けて内、
+  // 差し・追込は前が壁にならないよう外めを回る。
+  function laneOf(h){{ return 0.78 - 1.20*h.pos; }}
   var cx=410, cy=150;   // viewBox 820x300 の中心
   // ★コース幅(thick)。馬マーカーの直径に対しコース幅が十分広くないと
   //   馬群が横に広がれず常に団子に見える。実写に近い比率(マーカー径 ≒ コース幅の1割)
@@ -681,7 +684,7 @@ var GEOM = {geom_json};
     var order=[];
     horses.forEach(function(h,i){{
       var bias=1+paceShift[pace];
-      var styleOffset = styleBase[h.style] + styleKick[h.style]*Math.max(0,progress-0.55)/0.45;
+      var styleOffset = baseOf(h) + kickOf(h)*Math.max(0,progress-0.55)/0.45;
       var w = Math.max(0,progress-0.3)/0.7;
       var combined = styleOffset*(1-w) + (h._trialNorm!==undefined?h._trialNorm:0.5)*w;
       var pr=Math.max(0,Math.min(1,progress*bias));
@@ -702,7 +705,7 @@ var GEOM = {geom_json};
       //   という3段階で横位置を作る。この垂直方向は正が内ラチ側。
       var mid=(horses.length-1)/2;
       var laneHome = (mid-i)/Math.max(1,mid);              // +1=最内枠, -1=最外枠
-      var tgt = (styleLane[h.style]!==undefined?styleLane[h.style]:0) + (h._laneJit||0);
+      var tgt = laneOf(h) + (h._laneJit||0);
       var w1 = Math.max(0, Math.min(1, (progress-0.08)/0.27));  // 枠順→脚質の位置取りへ
       var lane = laneHome*(1-w1) + tgt*w1;
       lane += (h._laneOut||0)*stretch;                     // 直線で外に持ち出す馬
@@ -795,7 +798,9 @@ var GEOM = {geom_json};
     document.getElementById("results").innerHTML = order.map(function(h,i){{
       return '<div class="resrow"><span style="color:#5DCAA5;font-weight:500;font-size:13px;width:32px">'+medals[i]+'</span>'+
         '<span class="num" style="background:'+h.color+';color:'+h.text_color+'">'+h.num+'</span>'+
-        '<span style="font-size:13px;font-weight:500;flex:1">'+h.name+'</span>'+
+        '<span style="font-size:13px;font-weight:500;flex:1">'+h.name+
+          '<span style="font-size:10px;color:rgba(255,255,255,0.45);margin-left:6px">'+
+          (h.styleKnown?h.style:'脚質不明')+'</span></span>'+
         '<span style="font-size:11px;color:rgba(255,255,255,0.55)">'+(h.p_win!==undefined?('勝率'+(h.p_win*100).toFixed(0)+'%・'):'')+'複勝率'+(h.p_top3*100).toFixed(0)+'%</span></div>';
     }}).join("");
     document.getElementById("playBtn").textContent="▶ もう一回（別の試行）";
@@ -885,6 +890,56 @@ var GEOM = {geom_json};
 """
 
 STYLES = ["逃げ", "先行", "好位", "中団", "追込"]
+
+DB_PATH = Path(__file__).with_name("keibaAI_merged_final.db")
+
+
+def style_label(pos):
+    """run_style_avg(0=前, 1=後ろ)を脚質ラベルに変換。
+    閾値は se_pace_v3.run_style_cat の区分(0:〜0.15 / 1:〜0.40 / 2:〜0.70 / 3:それ以上)に合わせてある。
+    この区分は実際の4角通過順(平均 3.25 / 4.59 / 6.75 / 9.07番手)と整合することを確認済み。"""
+    if pos is None:
+        return "中団"
+    if pos < 0.15:
+        return "逃げ"
+    if pos < 0.40:
+        return "先行"
+    if pos < 0.70:
+        return "中団"
+    return "追込"
+
+
+def load_run_styles(horse_names, run_date):
+    """出走馬の脚質を se_pace_v3 から取得する。
+    ★従来は脚質を馬番順に「逃げ→先行→好位→中団→追込」と機械的に割り当てた見た目用の値で、
+      実際の走り方とは無関係だった。ここでDBの実データ(run_style_avg)に置き換える。
+    当日のレースはまだ走っていないためレースIDでは引けない。馬名で過去走を辿り、
+    開催日より前の最新の値を採用する(未来のデータは使わない)。
+    戻り値: {horse_name: run_style_avg}  取得できない馬(新馬など)は含まない。"""
+    if not DB_PATH.exists():
+        return {}
+    cutoff = str(run_date).replace("-", "")[:8]
+    try:
+        conn = sqlite3.connect(f"file:{DB_PATH.as_posix()}?immutable=1", uri=True)
+    except sqlite3.Error:
+        return {}
+    try:
+        df = pd.read_sql(
+            "SELECT horse_name, race_id, run_style_avg FROM se_pace_v3 "
+            "WHERE run_style_avg IS NOT NULL", conn)
+    except Exception:
+        return {}
+    finally:
+        conn.close()
+    df = df[df["horse_name"].isin(set(horse_names))].copy()
+    if df.empty:
+        return {}
+    df["race_id"] = df["race_id"].astype(str)
+    df = df[df["race_id"] < cutoff]
+    if df.empty:
+        return {}
+    latest = df.sort_values("race_id").groupby("horse_name").tail(1)
+    return dict(zip(latest["horse_name"], latest["run_style_avg"].astype(float)))
 
 
 def load_geometry():
@@ -983,7 +1038,7 @@ def geom_for_race(geom_all, place, surface, distance):
     }
 
 
-def build_horses(race_df, public: bool):
+def build_horses(race_df, public: bool, run_styles=None):
     """public=True の場合、勝率(win_calib等)は一切horses配列に含めない。
     抽選駆動用のstrengthも複勝率(top3_calib)から作るので、公開HTMLのソースを
     見ても勝率の数値そのものが存在しない（難読化ではなく非搭載による対策）。
@@ -1001,12 +1056,20 @@ def build_horses(race_df, public: bool):
             (int(row["horse_number"]) - 1) % 8 + 1)
         color, text_color = FRAME_COLOR.get(frame, ("#888", "#fff"))
         p_top3 = float(row[top3_col]) if pd.notna(row[top3_col]) else 0.3
+        # 脚質: DB(se_pace_v3)の実データを使う。取得できない馬(新馬など)は中団相当で扱う。
+        pos = (run_styles or {}).get(str(row["horse_name"]))
+        known = pos is not None
+        if not known:
+            pos = 0.5
+        pos = max(0.0, min(1.0, float(pos)))
         h = {
             "num": int(row["horse_number"]),
             "name": str(row["horse_name"]),
             "color": color,
             "text_color": text_color,
-            "style": STYLES[i % len(STYLES)],  # 実データに脚質列がないため見た目の味付け用に割当(結果には影響小)
+            "style": style_label(pos) if known else "中団",
+            "pos": round(pos, 4),      # 0=前で運ぶ / 1=後ろから
+            "styleKnown": bool(known),
             "p_top3": p_top3,
         }
         if public:
@@ -1042,6 +1105,15 @@ def main():
     if args.race_id:
         df = df[df["race_id"].astype(str) == str(args.race_id)]
 
+    # 出走馬の脚質をDBから一括取得(1回のクエリで済ませる)
+    _rd = str(df.iloc[0].get("date", "")) if len(df) else ""
+    run_styles = load_run_styles(set(df["horse_name"].astype(str)), _rd)
+    if run_styles:
+        print(f"[脚質] se_pace_v3から{len(run_styles)}頭ぶん取得"
+              f"（該当なしの馬は中団扱い）")
+    else:
+        print("[脚質] DBから取得できず。全馬を中団扱いで描画します")
+
     index_rows = []
     for race_id, race_df in df.groupby("race_id"):
         row0 = race_df.iloc[0]
@@ -1049,7 +1121,7 @@ def main():
         race_name = row0.get("race_name", "")
         date = row0.get("date", "")
         geom = geom_for_race(geom_all, place, surface, distance)
-        horses = build_horses(race_df, public=args.public)
+        horses = build_horses(race_df, public=args.public, run_styles=run_styles)
         lane_label = {"inner": "内回り", "outer": "外回り"}.get(geom.get("lane"), "")
         title = f"{place}{surface}{int(distance)}m {race_name}"
         sub = f"{date}｜{place}｜{surface}{int(distance)}m{('・'+lane_label) if lane_label else ''}｜{geom['turn']}回り"

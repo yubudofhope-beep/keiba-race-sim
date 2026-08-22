@@ -1,0 +1,852 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-3D31T25KK1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-3D31T25KK1');
+</script>
+<title>新潟芝1800m ２歳未勝利｜レースシミュレーション</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  body{margin:0;background:#0f1a13;font-family:"Hiragino Sans","Yu Gothic",sans-serif;display:flex;justify-content:center;padding:24px 10px}
+  .card{width:100%;max-width:520px;background:rgba(30,50,38,0.94);border-radius:16px;padding:20px;color:#fff}
+  .title{font-size:19px;font-weight:500;margin-bottom:2px}
+  .sub{font-size:12px;color:rgba(255,255,255,0.6);margin-bottom:12px}
+  .badge{background:rgba(20,30,24,0.55);padding:3px 8px;border-radius:4px;margin-bottom:3px;font-size:10px}
+  .pill{border-radius:2px;padding:0 4px;margin-right:4px;font-weight:500}
+  button{border:none;border-radius:10px;font-weight:500}
+  #playBtn{flex:1;height:46px;background:#e9e9e4;color:#1a2e22;font-size:15px}
+  .spdBtn{width:96px;height:46px;background:rgba(255,255,255,0.14);color:#fff;font-size:15px}
+  .resrow{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.08);border-radius:10px;padding:9px 14px;margin-bottom:6px}
+  .num{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500}
+  a.back{color:#5DCAA5;font-size:12px}
+</style></head>
+<body><div class="card">
+  <div style="display:flex;justify-content:space-between;align-items:center">
+    <div><div class="title">新潟芝1800m ２歳未勝利</div><div class="sub">2026-08-22｜新潟｜芝1800m｜左回り</div></div>
+    <a class="back" href="index.html?date=2026-08-22">← 一覧</a>
+  </div>
+  <div style="display:flex;gap:6px;margin-top:10px">
+    <button id="btn2d" style="flex:1;height:28px;background:rgba(255,255,255,0.22);color:#fff;font-size:11px;border-radius:8px">2Dコース</button>
+    <button id="btn3d" style="flex:1;height:28px;background:rgba(255,255,255,0.14);color:#fff;font-size:11px;border-radius:8px">3Dコース(β)</button>
+  </div>
+  <div id="viewSvg" style="position:relative;border-radius:12px;overflow:hidden;background:linear-gradient(180deg,#8fc98a,#6ba869);margin-top:8px">
+    <div style="position:absolute;top:8px;right:8px;font-size:10px;z-index:2">
+      <div class="badge"><span class="pill" style="background:#fff;color:#1a2e22">M</span>ペース想定</div>
+      <div class="badge"><span class="pill" style="background:#5DCAA5;color:#04342C">良</span>馬場 良</div>
+    </div>
+    <svg id="track" viewBox="0 0 820 300" style="width:100%;display:block">
+      <path id="trackOuter" fill="rgba(255,255,255,0.35)"/>
+      <path id="trackInner" fill="#7fc27d"/>
+      <line id="goalLine" stroke="#e2453f" stroke-width="4"/>
+      <text id="goalTag" font-size="10" fill="#8a2620" font-weight="600"></text>
+      <text id="progressLabel" x="410" y="150" text-anchor="middle" font-size="17" font-weight="500" fill="#1f3a26"></text>
+      <g id="horses"></g>
+    </svg>
+    <div style="position:absolute;bottom:6px;left:0;right:0;text-align:center;font-size:10px;color:#1f3a26">新潟 芝1800m（左回り）</div>
+  </div>
+  <div id="viewThree" style="display:none;position:relative;border-radius:12px;overflow:hidden;background:linear-gradient(180deg,#233b28,#16241a);margin-top:8px">
+    <canvas id="three3d" style="width:100%;height:300px;display:block"></canvas>
+    <div style="position:absolute;top:8px;right:8px;background:rgba(233,240,228,0.88);border-radius:12px;padding:8px 14px;text-align:right;min-width:104px">
+      <div><span id="dist3d" style="font-size:26px;font-weight:700;color:#1c2b34;line-height:1">--</span><span style="font-size:12px;color:#1c2b34">m</span></div>
+      <div id="sect3d" style="display:inline-block;margin-top:4px;background:#3b7fe0;color:#fff;font-size:12px;font-weight:600;padding:2px 12px;border-radius:20px">発走前</div>
+      <div id="grade3d" style="margin-top:4px;font-size:11px;font-weight:600;color:#2f6ea8">&nbsp;</div>
+    </div>
+    <div id="elev3d" style="position:absolute;top:8px;left:8px;background:rgba(233,240,228,0.88);color:#1c2b34;font-size:11px;font-weight:600;padding:4px 10px;border-radius:10px"></div>
+    <div id="startOverlay3d" style="position:absolute;left:0;right:0;bottom:22px;text-align:center">
+      <div style="display:inline-block;background:rgba(233,240,228,0.94);border-radius:14px;padding:10px 16px">
+        <div style="font-size:11px;color:#1c2b34;margin-bottom:6px">ペース想定</div>
+        <div id="paceBtns" style="display:flex;gap:6px;justify-content:center;margin-bottom:9px">
+          <button class="paceBtn" data-p="S" style="width:44px;height:30px;font-size:13px;border-radius:8px;background:#fff;color:#1c2b34">S</button>
+          <button class="paceBtn" data-p="M" style="width:44px;height:30px;font-size:13px;border-radius:8px;background:#3b7fe0;color:#fff">M</button>
+          <button class="paceBtn" data-p="H" style="width:44px;height:30px;font-size:13px;border-radius:8px;background:#fff;color:#1c2b34">H</button>
+        </div>
+        <button id="startRaceBtn" style="width:150px;height:34px;font-size:13px;border-radius:9px;background:#1c2b34;color:#fff">▶ レース開始</button>
+      </div>
+    </div>
+    <div style="position:absolute;bottom:6px;left:0;right:0;text-align:center;font-size:10px;color:rgba(255,255,255,0.6)">ドラッグで視点回転・ホイールでズーム／高低差はJRA公表値・起伏は誇張表示、勾配%は目安</div>
+  </div>
+  <div style="display:flex;gap:8px;margin:14px 0">
+    <button id="playBtn">走行中...</button>
+    <button class="spdBtn" id="spdBtn">速度 x2</button>
+  </div>
+  <div style="font-size:11px;color:rgba(255,255,255,0.55);text-align:center;margin-bottom:8px">※着順はwin_calib/top3_calib(較正済み予測確率)を反映したPlackett-Luce抽選（Gumbelノイズ）で試行ごとに決定</div>
+  <div id="results"></div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+var HORSES = [{"num": 1, "name": "スクリプトール", "color": "#ffffff", "text_color": "#1a2e22", "style": "中団", "pos": 0.5, "styleKnown": false, "p_top3": 0.8053571428571429, "s": 0.28906351490760507}, {"num": 2, "name": "アニエーネ", "color": "#1a1a1a", "text_color": "#fff", "style": "中団", "pos": 0.5, "styleKnown": false, "p_top3": 0.6309904153354633, "s": 0.22647878515461645}, {"num": 3, "name": "ブルーグラビティ", "color": "#e2453f", "text_color": "#fff", "style": "中団", "pos": 0.5, "styleKnown": false, "p_top3": 0.1958105646630236, "s": 0.07028147770159741}, {"num": 4, "name": "アラータス", "color": "#3b6ee0", "text_color": "#fff", "style": "中団", "pos": 0.5, "styleKnown": false, "p_top3": 0.2406967537608867, "s": 0.08639229227189454}, {"num": 5, "name": "コスモイェーガー", "color": "#f2b632", "text_color": "#1a2e22", "style": "中団", "pos": 0.5, "styleKnown": false, "p_top3": 0.2406967537608867, "s": 0.08639229227189454}, {"num": 6, "name": "ハチキンキリシマ", "color": "#2fa64d", "text_color": "#fff", "style": "中団", "pos": 0.5, "styleKnown": false, "p_top3": 0.1106194690265486, "s": 0.03970418939923541}, {"num": 7, "name": "エボニーウイング", "color": "#e368a8", "text_color": "#fff", "style": "中団", "pos": 0.5, "styleKnown": false, "p_top3": 0.5619195046439628, "s": 0.2016874482931564}];
+var GEOM = {"straightHalf": 272, "ry": 28, "realOneLap": 2223, "distance": 1800, "turn": "左", "is_straight_course": false, "surface": "芝", "elevM": 0.8, "lane": null};
+(function(){
+  var horses = HORSES;
+  // ★脚質は h.pos(DBのrun_style_avg: 0=前で運ぶ / 1=後ろから)の連続値で扱う。
+  //   以前は馬番順に逃げ→先行→…と機械的に割り当てた見た目だけの値だった。
+  function baseOf(h){ return 0.97 - 0.82*h.pos; }   // 道中の前後位置
+  function kickOf(h){ return -0.05 + 0.27*h.pos; }  // 終いの伸び(後ろの馬ほど末脚)
+  // 道中の横位置(+1=最内ラチ沿い / -1=最外)。前で運ぶ馬はロスを避けて内、
+  // 差し・追込は前が壁にならないよう外めを回る。
+  function laneOf(h){ return 0.78 - 1.20*h.pos; }
+  var cx=410, cy=150;   // viewBox 820x300 の中心
+  // ★コース幅(thick)。馬マーカーの直径に対しコース幅が十分広くないと
+  //   馬群が横に広がれず常に団子に見える。実写に近い比率(マーカー径 ≒ コース幅の1割)
+  //   になるよう thick=110 / SCALE3D=0.06 / マーカー径0.7 で釣り合わせている。
+  var straightHalf = GEOM.straightHalf, ry = GEOM.ry, thick = 110, rMid = ry+thick/2;
+  var mirror = GEOM.turn === "右"; // 右回り=時計回り想定でX反転して描画
+  // ★新潟芝1000mは日本唯一の直線専用コース。以前はフラグだけ持たせて
+  //   注記を出すのみで、描画は他場と同じ楕円のままだった(コーナーが存在しないのに
+  //   1〜2角/向正面が表示される)。直線コースは往復しない一本道として描く。
+  var isStraight = !!GEOM.is_straight_course;
+  function ovalPath(r){
+    var x1=cx-straightHalf,x2=cx+straightHalf;
+    if (isStraight){
+      // 上下に細長い長方形(=直線コース)。往路のみで周回しない。
+      return "M "+x1+" "+(cy-r)+" L "+x2+" "+(cy-r)+" L "+x2+" "+(cy+r)+
+             " L "+x1+" "+(cy+r)+" Z";
+    }
+    return "M "+x1+" "+(cy-r)+" L "+x2+" "+(cy-r)+" A "+r+" "+r+" 0 0 1 "+x2+" "+(cy+r)+
+           " L "+x1+" "+(cy+r)+" A "+r+" "+r+" 0 0 1 "+x1+" "+(cy-r)+" Z";
+  }
+  document.getElementById("trackOuter").setAttribute("d", ovalPath(ry+thick));
+  document.getElementById("trackInner").setAttribute("d", ovalPath(ry));
+  var centerPath = document.createElementNS("http://www.w3.org/2000/svg","path");
+  // 直線コースは周回しない一本道。走行線も閉じた楕円ではなく左→右の直線にする。
+  centerPath.setAttribute("d", isStraight
+    ? ("M "+(cx-straightHalf)+" "+cy+" L "+(cx+straightHalf)+" "+cy)
+    : ovalPath(rMid));
+  document.getElementById("horses").appendChild(centerPath);
+  centerPath.style.display = "none";
+  var len = centerPath.getTotalLength();
+  var goalSideSign = mirror ? -1 : 1;
+  var goalPt = isStraight
+    ? {x: cx+straightHalf, y: cy}
+    : {x: cx - straightHalf*0.13*goalSideSign, y: cy + rMid};
+  var bestT=0,bestD=Infinity,samples=400;
+  for (var i=0;i<=samples;i++){
+    var t=i/samples*len, p=centerPath.getPointAtLength(t);
+    var d=(p.x-goalPt.x)*(p.x-goalPt.x)+(p.y-goalPt.y)*(p.y-goalPt.y);
+    if (d<bestD){bestD=d;bestT=t;}
+  }
+  var goalFrac = bestT/len;
+  var goalPtActual = centerPath.getPointAtLength(bestT);
+  var tang=centerPath.getPointAtLength(Math.min(len,bestT+1));
+  var tangPrev=centerPath.getPointAtLength(Math.max(0,bestT-1));
+  var dirx=tang.x-tangPrev.x, diry=tang.y-tangPrev.y, dl=Math.sqrt(dirx*dirx+diry*diry)||1;
+  var nx=-diry/dl, ny=dirx/dl;
+  document.getElementById("goalLine").setAttribute("x1", goalPtActual.x+nx*16);
+  document.getElementById("goalLine").setAttribute("y1", goalPtActual.y+ny*16);
+  document.getElementById("goalLine").setAttribute("x2", goalPtActual.x-nx*16);
+  document.getElementById("goalLine").setAttribute("y2", goalPtActual.y-ny*16);
+  var tag=document.getElementById("goalTag");
+  tag.setAttribute("x", goalPtActual.x-14); tag.setAttribute("y", goalPtActual.y+ny*16+14);
+  tag.textContent="ゴール";
+  var scale = len / GEOM.realOneLap;
+  var raceDistSvg = GEOM.distance * scale;
+  // ★過去バグ: レース距離が1周(len)より長い場合(例:中京芝2000m対1周1705.9m)、
+  //   従来はstartFracとgoalFracの差を"1周未満の弧(%1)"に丸めていたため、
+  //   実際は1周以上グルっと回るはずの距離が4角付近の短い弧に圧縮されてしまっていた。
+  //   周回数(lapsSpan)を%1で丸めず、実距離ぶんそのまま進める形に修正。
+  var lapsSpan = raceDistSvg / len; // 1周に満たない場合もあれば複数周のこともある
+  var startFrac = (((goalFrac * len - raceDistSvg) % len) + len) % len / len;
+  if (isStraight){
+    // 直線コースは一本道の端から端でちょうどレース距離。周回や巻き戻しはしない。
+    lapsSpan = 1; startFrac = 0;
+  }
+  var g=document.getElementById("horses");
+  horses.forEach(function(h,i){
+    var el=document.createElementNS("http://www.w3.org/2000/svg","g");
+    el.innerHTML='<circle r="9" fill="'+h.color+'" stroke="rgba(0,0,0,0.15)"></circle><text x="0" y="3.5" text-anchor="middle" font-size="9" font-weight="500" fill="'+h.text_color+'">'+h.num+'</text>';
+    g.appendChild(el); h.el=el;
+    h.strength = Math.log(Math.max(h.s,0.001)) - Math.log(Math.max(1-h.s,0.001));
+  });
+  var mode = "2d", SCALE3D = 0.06;
+  var scene3D, camera3D, renderer3D, gate3D;
+  var gatePhase = false;
+  var camYaw = 0, camPitchOff = 0, camDist = 9, camHeight = 4.2;
+  var lastProgress = 0;
+  // ---- 高低差(コースの起伏) ----
+  // GEOM.elevM は course_geometry.json 由来の実測高低差(m)。
+  // 位置ごとの詳細な標高プロファイルは公表値が無いため、JRA各場に共通する形
+  //   「向正面〜3角付近が最高点 / ゴール手前に最低点があり最後は上り」
+  // を基準にした近似モデルで補間する(=勾配%は目安値)。
+  // 実寸だと最大でも3.5m程度で3Dではほぼ見えないため、表示上はELEV_EXAG倍に誇張する。
+  var ELEV_EXAG = 12;
+  var worldPerM = SCALE3D * (len / GEOM.realOneLap);
+  var elevAmpWorld = (GEOM.elevM || 0) * worldPerM * ELEV_EXAG;
+  // t = ゴールまでの残り(1周に対する割合)。JRA各場に共通する断面:
+  //   ゴール前の短い区間に坂が集中 → 最低点 → 向正面〜3角が最高点 → 4角にかけて下る
+  // ゴール前の坂を1周全体に均すと勾配が実測より大幅に小さくなるため、
+  // 坂の区間長(ELEV_CLIMB_M)を区切って集中させている。
+  var ELEV_CLIMB_M = 110;                       // ゴール前の坂の長さ(m)
+  var ELEV_FIN_RATIO = 0.55;                    // 高低差のうちゴール前の坂が占める割合
+  function elevNormAtFrac(pf){
+    // 直線コースは周回しないので、残り割合は素直に 1-pf(巻き戻しなし)
+    var t = isStraight ? Math.max(0, Math.min(1, 1 - pf))
+                       : (((goalFrac - pf) % 1) + 1) % 1;
+    var tc = Math.min(0.3, ELEV_CLIMB_M / GEOM.realOneLap);
+    var hFin = ELEV_FIN_RATIO;
+    if (t <= tc){
+      // ゴール前の坂(ゴールに向かって上る)
+      return hFin * (0.5 + 0.5*Math.cos(Math.PI * (t/tc)));
+    }
+    if (t <= 0.55){
+      // 最低点 → 最高点(向正面〜3角)
+      return 0.5 - 0.5*Math.cos(Math.PI * (t - tc) / (0.55 - tc));
+    }
+    // 最高点 → 4角を下ってゴール前の坂の入口へ
+    var w = (t - 0.55) / (1 - 0.55);
+    return 1 - (1 - hFin) * (0.5 - 0.5*Math.cos(Math.PI * w));
+  }
+  function elevAtFrac(pf){ return elevNormAtFrac(pf) * elevAmpWorld; }
+  // 現在地の勾配(%)。実距離ベースなので誇張は外して計算する。
+  function gradePctAtProgress(pr){
+    var pf = pathFrac(Math.max(0, Math.min(1, pr)));
+    var dPf = 20 / GEOM.realOneLap;     // 20m先
+    var e1 = elevNormAtFrac(pf) * (GEOM.elevM || 0);
+    var e2 = elevNormAtFrac(pf + dPf) * (GEOM.elevM || 0);
+    return (e2 - e1) / 20 * 100;
+  }
+  function makeSurfaceTexture(base, variance, stripes){
+    var c=document.createElement("canvas"); c.width=128; c.height=128;
+    var ctx=c.getContext("2d");
+    var br=parseInt(base.slice(1,3),16), bg=parseInt(base.slice(3,5),16), bb=parseInt(base.slice(5,7),16);
+    ctx.fillStyle=base; ctx.fillRect(0,0,128,128);
+    for (var i=0;i<700;i++){
+      var x=Math.random()*128, y=Math.random()*128, v=(Math.random()-0.5)*variance;
+      var r=Math.max(0,Math.min(255,br+v)), g=Math.max(0,Math.min(255,bg+v)), b=Math.max(0,Math.min(255,bb+v));
+      ctx.fillStyle="rgba("+r+","+g+","+b+",0.55)";
+      ctx.beginPath(); ctx.arc(x,y,Math.random()*2.2+0.4,0,Math.PI*2); ctx.fill();
+    }
+    if (stripes){
+      for (var s=0;s<128;s+=16){
+        ctx.fillStyle = (s/16)%2===0 ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.05)";
+        ctx.fillRect(0,s,128,8);
+      }
+    }
+    var tex=new THREE.CanvasTexture(c);
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+    return tex;
+  }
+  function makeHorseTexture(h){
+    var c=document.createElement("canvas"); c.width=64; c.height=64;
+    var ctx=c.getContext("2d");
+    ctx.beginPath(); ctx.arc(32,32,26,0,Math.PI*2);
+    ctx.fillStyle=h.color; ctx.fill();
+    ctx.lineWidth=5; ctx.strokeStyle="rgba(255,255,255,0.95)"; ctx.stroke();
+    ctx.fillStyle=h.text_color; ctx.font="bold 28px sans-serif";
+    ctx.textAlign="center"; ctx.textBaseline="middle";
+    ctx.fillText(String(h.num),32,34);
+    return new THREE.CanvasTexture(c);
+  }
+  function buildTrackMesh3D(){
+    var outerEl=document.getElementById("trackOuter"), innerEl=document.getElementById("trackInner");
+    var outerLen=outerEl.getTotalLength(), innerLen=innerEl.getTotalLength();
+    var segs=110, positions=[], uvs=[], indices=[];
+    for (var i=0;i<=segs;i++){
+      var f=i/segs;
+      var po=outerEl.getPointAtLength(f*outerLen);
+      var pi=innerEl.getPointAtLength(f*innerLen);
+      var ey=elevAtFrac(f);
+      positions.push((po.x-cx)*SCALE3D,ey,(po.y-cy)*SCALE3D);
+      positions.push((pi.x-cx)*SCALE3D,ey,(pi.y-cy)*SCALE3D);
+      uvs.push(f*14,1, f*14,0);
+    }
+    for (var i=0;i<segs;i++){
+      var a=i*2,b=i*2+1,c=i*2+2,d=i*2+3;
+      indices.push(a,b,c, b,d,c);
+    }
+    var geo=new THREE.BufferGeometry();
+    geo.setAttribute("position", new THREE.Float32BufferAttribute(positions,3));
+    geo.setAttribute("uv", new THREE.Float32BufferAttribute(uvs,2));
+    geo.setIndex(indices);
+    geo.computeVertexNormals();
+    var isTurf = GEOM.surface !== "ダート";
+    var tex = isTurf ? makeSurfaceTexture("#5fa14f", 30, true) : makeSurfaceTexture("#8a5a3a", 26, false);
+    tex.repeat.set(1,1);
+    var mat=new THREE.MeshStandardMaterial({map:tex, side:THREE.DoubleSide, roughness:0.95});
+    return new THREE.Mesh(geo, mat);
+  }
+  function buildRail3D(pathEl, y){
+    var grp=new THREE.Group();
+    var totalLen=pathEl.getTotalLength(), segs=150, pts=[];
+    for (var i=0;i<=segs;i++){
+      var f=i/segs;
+      var p=pathEl.getPointAtLength(f*totalLen);
+      pts.push(new THREE.Vector3((p.x-cx)*SCALE3D, y+elevAtFrac(f), (p.y-cy)*SCALE3D));
+    }
+    var railMat=new THREE.LineBasicMaterial({color:0xf4f4ee});
+    [0, -0.16].forEach(function(dy){
+      var pts2=pts.map(function(v){ return new THREE.Vector3(v.x, v.y+dy, v.z); });
+      grp.add(new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(pts2), railMat));
+    });
+    var postGeo=new THREE.CylinderGeometry(0.035,0.035,y+0.1,5);
+    var postMat=new THREE.MeshStandardMaterial({color:0xe8e8e0, roughness:0.8});
+    for (var i=0;i<segs;i+=5){
+      var post=new THREE.Mesh(postGeo, postMat);
+      post.position.set(pts[i].x, (y+0.1)/2, pts[i].z);
+      post.castShadow=true;
+      grp.add(post);
+    }
+    return grp;
+  }
+  // 走路上の点を等間隔にサンプルし、任意座標→最寄り地点の標高を引けるようにする
+  var elevSamples = (function(){
+    var arr=[], N=240;
+    for (var i=0;i<N;i++){
+      var f=i/N, p=centerPath.getPointAtLength(f*len);
+      arr.push({x:(p.x-cx)*SCALE3D, z:(p.y-cy)*SCALE3D, e:elevAtFrac(f)});
+    }
+    return arr;
+  })();
+  function terrainElevAt(x, z){
+    var best=null, bestD=Infinity;
+    for (var i=0;i<elevSamples.length;i++){
+      var s=elevSamples[i], dx=x-s.x, dz=z-s.z, d=dx*dx+dz*dz;
+      if (d<bestD){ bestD=d; best=s; }
+    }
+    // 走路から離れるほど起伏をなだらかに戻す
+    var dist=Math.sqrt(bestD);
+    var fall=Math.max(0, 1 - Math.max(0, dist-4)/26);
+    return best.e * fall;
+  }
+  function buildTree3D(x, z, tall){
+    var grp=new THREE.Group();
+    var trunkMat=new THREE.MeshStandardMaterial({color:0xa8794f, roughness:1});
+    var trunk=new THREE.Mesh(new THREE.CylinderGeometry(0.09,0.12,0.7,5), trunkMat);
+    trunk.position.y=0.35; trunk.castShadow=true; grp.add(trunk);
+    var leafCol = new THREE.Color().setHSL(0.27, 0.42, 0.42+Math.random()*0.16);
+    var leafMat = new THREE.MeshStandardMaterial({color:leafCol, roughness:1, flatShading:true});
+    var leaf;
+    if (tall){
+      leaf=new THREE.Mesh(new THREE.SphereGeometry(0.42,7,7), leafMat);
+      leaf.scale.set(0.62,1.9,0.62); leaf.position.y=1.45;
+    } else {
+      leaf=new THREE.Mesh(new THREE.DodecahedronGeometry(0.62,0), leafMat);
+      leaf.position.y=1.15;
+    }
+    leaf.castShadow=true; grp.add(leaf);
+    grp.position.set(x, terrainElevAt(x,z), z);
+    var s=0.8+Math.random()*0.7; grp.scale.set(s,s,s);
+    return grp;
+  }
+  // ★コース(トラック)はカプセル形状: 中心線分(±straightHalf, 0)からの距離が
+  //   ry〜ry+thick の範囲が走路。以前は外周パスを60点サンプルして距離判定していたため
+  //   サンプル間の隙間や内馬場に木が生えてしまっていた。数式で厳密に判定する。
+  function distToSpine3D(x,z){
+    var shW = straightHalf*SCALE3D;
+    var dx = Math.abs(x) - shW;
+    if (dx < 0) dx = 0;                 // 直線部の真横なら垂直距離のみ
+    return Math.sqrt(dx*dx + z*z);
+  }
+  function scatterTrees3D(){
+    var grp=new THREE.Group();
+    var outerR = (ry+thick)*SCALE3D;
+    var minR = outerR + 1.6;            // 走路の外側にマージンを取る
+    var maxR = outerR + 17;
+    var placed=0, tries=0;
+    while (placed<52 && tries<2500){
+      tries++;
+      var x=(Math.random()-0.5)*2*(straightHalf*SCALE3D+maxR);
+      var z=(Math.random()-0.5)*2*maxR;
+      var d=distToSpine3D(x,z);
+      if (d < minR || d > maxR) continue;   // 走路上・内馬場・遠すぎる場所には置かない
+      grp.add(buildTree3D(x,z, Math.random()<0.35));
+      placed++;
+    }
+    return grp;
+  }
+  function makeMeshPanelTexture(){
+    // 発走ゲートの網目(前扉)用テクスチャ。線以外は透過。
+    var c=document.createElement("canvas"); c.width=64; c.height=64;
+    var ctx=c.getContext("2d");
+    ctx.clearRect(0,0,64,64);
+    ctx.strokeStyle="rgba(225,225,215,0.95)"; ctx.lineWidth=3;
+    for (var i=0;i<=64;i+=10){
+      ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,64); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0,i); ctx.lineTo(64,i); ctx.stroke();
+    }
+    var t=new THREE.CanvasTexture(c);
+    t.wrapS=t.wrapT=THREE.RepeatWrapping;
+    return t;
+  }
+  function makeNumberPlateTexture(h){
+    // 各馬房の上に付く枠番号プレート
+    var c=document.createElement("canvas"); c.width=64; c.height=64;
+    var ctx=c.getContext("2d");
+    ctx.fillStyle=h.color; ctx.fillRect(0,0,64,64);
+    ctx.strokeStyle="rgba(0,0,0,0.25)"; ctx.lineWidth=3; ctx.strokeRect(1.5,1.5,61,61);
+    ctx.fillStyle=h.text_color; ctx.font="bold 42px sans-serif";
+    ctx.textAlign="center"; ctx.textBaseline="middle";
+    ctx.fillText(String(h.num),32,35);
+    return new THREE.CanvasTexture(c);
+  }
+  function buildGoal3D(){
+    // ゴール線・ゴール板。3D側にゴールの目印が無かったため追加。
+    var grp=new THREE.Group();
+    var gx=(goalPtActual.x-cx)*SCALE3D, gz=(goalPtActual.y-cy)*SCALE3D;
+    var tX=dirx/dl, tZ=diry/dl;                 // 進行方向(world)
+    var wTrack=thick*SCALE3D;
+    var inner=new THREE.Group();
+    // 走路を横断する白いゴール線
+    var line=new THREE.Mesh(
+      new THREE.PlaneGeometry(wTrack, 0.28),
+      new THREE.MeshBasicMaterial({color:0xffffff, transparent:true, opacity:0.95}));
+    line.rotation.x=-Math.PI/2; line.position.y=0.03;
+    inner.add(line);
+    // 両端のゴール標(紅白ポール)
+    [-wTrack/2, wTrack/2].forEach(function(px, idx){
+      var pole=new THREE.Mesh(
+        new THREE.CylinderGeometry(0.07,0.07,2.0,6),
+        new THREE.MeshStandardMaterial({color:0xffffff, roughness:0.8}));
+      pole.position.set(px, 1.0, 0); pole.castShadow=true; inner.add(pole);
+      var band=new THREE.Mesh(
+        new THREE.CylinderGeometry(0.075,0.075,0.5,6),
+        new THREE.MeshStandardMaterial({color:0xe2453f, roughness:0.8}));
+      band.position.set(px, 1.45, 0); inner.add(band);
+      // 内側の柱にゴール板を掲げる
+      if (idx===0){
+        var c=document.createElement("canvas"); c.width=128; c.height=64;
+        var ctx=c.getContext("2d");
+        ctx.fillStyle="#1a1a1a"; ctx.fillRect(0,0,128,64);
+        ctx.strokeStyle="#ffffff"; ctx.lineWidth=4; ctx.strokeRect(3,3,122,58);
+        ctx.fillStyle="#ffffff"; ctx.font="bold 34px sans-serif";
+        ctx.textAlign="center"; ctx.textBaseline="middle";
+        ctx.fillText("ゴール",64,35);
+        var sign=new THREE.Mesh(
+          new THREE.PlaneGeometry(1.5,0.75),
+          new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(c), side:THREE.DoubleSide}));
+        sign.position.set(px-0.85, 1.75, 0);
+        inner.add(sign);
+      }
+    });
+    grp.add(inner);
+    grp.position.set(gx, elevAtFrac(goalFrac), gz);
+    grp.rotation.y = Math.atan2(tX, tZ);
+    return grp;
+  }
+  // 馬房幅(world)。★以前は下限0.5を設けていたため、15頭以上でゲート全幅が
+  //   コース幅(thick*SCALE3D)を超え、外枠の馬が柵の外に立っていた。
+  //   常にコース幅を頭数で割り、はみ出さないようにする。
+  function gateCellW(){
+    return (thick*0.94*SCALE3D)/horses.length;
+  }
+  function buildGate3D(){
+    // 発走ゲート。走行方向に対して横一列に馬房を並べ、各房に
+    // 仕切り・黒い後扉・網目の前扉・上部の枠番号プレート・アンテナ支柱を組む。
+    var grp=new THREE.Group();
+    var sp=centerPath.getPointAtLength(startFrac*len);
+    var sp2=centerPath.getPointAtLength(((startFrac*len)+3)%len);
+    var tx=sp2.x-sp.x, ty=sp2.y-sp.y, tl=Math.sqrt(tx*tx+ty*ty)||1;
+    tx/=tl; ty/=tl;
+    var sx=(sp.x-cx)*SCALE3D, sz=(sp.y-cy)*SCALE3D;
+    var yaw=Math.atan2(tx,ty);          // ローカル+Zが進行方向を向く回転
+    var latX=ty, latZ=-tx;              // ローカル+Xに対応する横方向
+    var n=horses.length;
+    var cellW=gateCellW();
+    var frameMat=new THREE.MeshStandardMaterial({color:0xdcdcd2, roughness:0.7});
+    var backMat=new THREE.MeshStandardMaterial({color:0x1e1e1e, roughness:0.9});
+    var meshTex=makeMeshPanelTexture();
+    var H=cellW*2.4, D=cellW*1.9, pw=cellW*0.12;   // 馬房幅を基準に高さ/奥行きを決める
+    for (var i=0;i<n;i++){
+      var off=(i-(n-1)/2)*cellW;
+      var cell=new THREE.Group();
+      // 左右の仕切り柱
+      [-cellW/2, cellW/2].forEach(function(px){
+        var post=new THREE.Mesh(new THREE.BoxGeometry(pw, H, pw*1.2), frameMat);
+        post.position.set(px, H/2, 0); post.castShadow=true; cell.add(post);
+        // 支柱上のアンテナ
+        var ant=new THREE.Mesh(new THREE.CylinderGeometry(pw*0.15,pw*0.15,H*0.42,4), frameMat);
+        ant.position.set(px, H+H*0.21, 0); cell.add(ant);
+        // 接地部の足
+        var foot=new THREE.Mesh(new THREE.BoxGeometry(pw*1.6,H*0.06,D), frameMat);
+        foot.position.set(px, H*0.03, 0); foot.castShadow=true; cell.add(foot);
+      });
+      // 側面の仕切り板(腰から下)
+      [-cellW/2, cellW/2].forEach(function(px){
+        var side=new THREE.Mesh(new THREE.BoxGeometry(pw*0.5, H*0.48, D*0.9), frameMat);
+        side.position.set(px, H*0.31, 0); side.castShadow=true; cell.add(side);
+      });
+      // 後扉(黒板)
+      var back=new THREE.Mesh(new THREE.BoxGeometry(cellW*0.94, H*0.66, pw*0.6), backMat);
+      back.position.set(0, H*0.34, -D/2); back.castShadow=true; cell.add(back);
+      // 前扉(網目)
+      var mtex=meshTex.clone(); mtex.needsUpdate=true; mtex.repeat.set(2,2);
+      var meshMat=new THREE.MeshBasicMaterial({map:mtex, transparent:true, side:THREE.DoubleSide});
+      var door=new THREE.Mesh(new THREE.PlaneGeometry(cellW*0.94, H*0.72), meshMat);
+      door.position.set(0, H*0.43, D/2); cell.add(door);
+      // 上部の横枠
+      var topBar=new THREE.Mesh(new THREE.BoxGeometry(cellW, pw, pw), frameMat);
+      topBar.position.set(0, H, 0); topBar.castShadow=true; cell.add(topBar);
+      var topBar2=new THREE.Mesh(new THREE.BoxGeometry(cellW, pw*0.8, pw*0.8), frameMat);
+      topBar2.position.set(0, H, D/2); cell.add(topBar2);
+      // 枠番号プレート
+      var plate=new THREE.Mesh(
+        new THREE.PlaneGeometry(cellW*0.62,cellW*0.62),
+        new THREE.MeshBasicMaterial({map:makeNumberPlateTexture(horses[i]), side:THREE.DoubleSide}));
+      plate.position.set(0, H+cellW*0.4, D/2+0.02);
+      cell.add(plate);
+      cell.position.set(sx+latX*off, elevAtFrac(startFrac), sz+latZ*off);
+      cell.rotation.y = yaw;
+      grp.add(cell);
+    }
+    grp.visible = false;
+    return grp;
+  }
+  function init3D(){
+    if (typeof THREE === "undefined") return;
+    var canvasEl = document.getElementById("three3d");
+    scene3D = new THREE.Scene();
+    scene3D.fog = new THREE.Fog(0x16241a, 26, 85);
+    var w = canvasEl.clientWidth || 520;
+    camera3D = new THREE.PerspectiveCamera(50, w/300, 0.1, 300);
+    renderer3D = new THREE.WebGLRenderer({canvas:canvasEl, antialias:true, alpha:true});
+    renderer3D.setSize(w, 300, false);
+    renderer3D.setPixelRatio(Math.min(window.devicePixelRatio||1, 2));
+    renderer3D.shadowMap.enabled = true;
+    renderer3D.shadowMap.type = THREE.PCFSoftShadowMap;
+    scene3D.add(new THREE.AmbientLight(0xffffff, 0.62));
+    var sun = new THREE.DirectionalLight(0xfff4e0, 0.85);
+    sun.position.set(-16, 22, 10);
+    sun.castShadow = true;
+    sun.shadow.mapSize.width = 1024; sun.shadow.mapSize.height = 1024;
+    sun.shadow.camera.left=-34; sun.shadow.camera.right=34;
+    sun.shadow.camera.top=34; sun.shadow.camera.bottom=-34;
+    sun.shadow.camera.near=1; sun.shadow.camera.far=70;
+    scene3D.add(sun);
+    var groundGeo = new THREE.PlaneGeometry(110, 110, 72, 72);
+    // 地面も走路の起伏に合わせて変形させる(走路だけ浮いて見えないように)
+    var gpos = groundGeo.attributes.position;
+    for (var vi=0; vi<gpos.count; vi++){
+      var gx=gpos.getX(vi), gy=gpos.getY(vi);
+      gpos.setZ(vi, terrainElevAt(gx, -gy));   // 後で x軸-90度回転するのでyとzが入れ替わる
+    }
+    gpos.needsUpdate = true;
+    groundGeo.computeVertexNormals();
+    var grassTex = makeSurfaceTexture("#2f6b32", 22, false);
+    grassTex.repeat.set(20,20);
+    var ground = new THREE.Mesh(groundGeo, new THREE.MeshStandardMaterial({map:grassTex, roughness:1}));
+    ground.rotation.x = -Math.PI/2; ground.position.y = -0.05;
+    ground.receiveShadow = true;
+    scene3D.add(ground);
+    var trackMesh = buildTrackMesh3D();
+    trackMesh.receiveShadow = true;
+    scene3D.add(trackMesh);
+    scene3D.add(buildRail3D(document.getElementById("trackOuter"), 0.34));
+    scene3D.add(buildRail3D(document.getElementById("trackInner"), 0.34));
+    scene3D.add(scatterTrees3D());
+    scene3D.add(buildGoal3D());
+    gate3D = buildGate3D();
+    scene3D.add(gate3D);
+    horses.forEach(function(h){
+      var tex = makeHorseTexture(h);
+      var mat = new THREE.SpriteMaterial({map:tex, transparent:true});
+      var spr = new THREE.Sprite(mat);
+      spr.scale.set(0.7, 0.7, 1);   // コース幅6.6に対し約1割(動画と同等の比率)
+      spr.position.y = 0.34;
+      scene3D.add(spr);
+      h.mesh3D = spr;
+      var shadow = new THREE.Mesh(
+        new THREE.CircleGeometry(0.24, 12),
+        new THREE.MeshBasicMaterial({color:0x000000, transparent:true, opacity:0.24}));
+      shadow.rotation.x = -Math.PI/2;
+      shadow.position.y = 0.03;
+      scene3D.add(shadow);
+      h.shadow3D = shadow;
+    });
+    var dragging=false, lastX=0, lastY=0;
+    canvasEl.addEventListener("mousedown", function(e){ dragging=true; lastX=e.clientX; lastY=e.clientY; });
+    window.addEventListener("mouseup", function(){ dragging=false; });
+    window.addEventListener("mousemove", function(e){
+      if (!dragging) return;
+      camYaw -= (e.clientX-lastX)*0.008;
+      camPitchOff = Math.max(-2.5, Math.min(6, camPitchOff - (e.clientY-lastY)*0.03));
+      lastX=e.clientX; lastY=e.clientY;
+    });
+    canvasEl.addEventListener("wheel", function(e){
+      e.preventDefault();
+      camDist = Math.max(4, Math.min(40, camDist + e.deltaY*0.02));
+    }, {passive:false});
+    canvasEl.addEventListener("touchstart", function(e){
+      if (e.touches.length===1){ dragging=true; lastX=e.touches[0].clientX; lastY=e.touches[0].clientY; }
+    }, {passive:true});
+    window.addEventListener("touchend", function(){ dragging=false; });
+    window.addEventListener("touchmove", function(e){
+      if (!dragging || e.touches.length!==1) return;
+      camYaw -= (e.touches[0].clientX-lastX)*0.008;
+      camPitchOff = Math.max(-2.5, Math.min(6, camPitchOff - (e.touches[0].clientY-lastY)*0.03));
+      lastX=e.touches[0].clientX; lastY=e.touches[0].clientY;
+    }, {passive:true});
+    function updateCamera3D(){
+      var p = pathFrac(lastProgress) * len;
+      var pt = centerPath.getPointAtLength(p);
+      var pt2 = centerPath.getPointAtLength((p+2)%len);
+      var tx=pt2.x-pt.x, ty=pt2.y-pt.y, tl=Math.sqrt(tx*tx+ty*ty)||1;
+      tx/=tl; ty/=tl;
+      var cxp=(pt.x-cx)*SCALE3D, czp=(pt.y-cy)*SCALE3D;
+      var cyp=elevAtFrac(pathFrac(lastProgress));
+      if (gatePhase){
+        // 枠入り中はゲート全体を斜め前から見せる
+        var gyaw = Math.atan2(tx,ty) + camYaw + 0.85;
+        var gd = 7.5;
+        camera3D.position.set(
+          cxp - Math.sin(gyaw)*gd + tx*2.2,
+          cyp + 3.2 + camPitchOff,
+          czp - Math.cos(gyaw)*gd + ty*2.2);
+        camera3D.lookAt(cxp, cyp+0.9, czp);
+        return;
+      }
+      var yaw = Math.atan2(tx,ty) + camYaw;
+      var bx = -Math.sin(yaw)*camDist, bz=-Math.cos(yaw)*camDist;
+      camera3D.position.set(cxp+bx, cyp+camHeight+camPitchOff, czp+bz);
+      camera3D.lookAt(cxp, cyp+0.6, czp);
+    }
+    function idleRender3D(){
+      if (renderer3D) {
+        updateCamera3D();
+        renderer3D.render(scene3D, camera3D);
+      }
+      requestAnimationFrame(idleRender3D);
+    }
+    idleRender3D();
+  }
+  function setMode(m){
+    mode = m;
+    document.getElementById("viewSvg").style.display = (m==="2d") ? "block" : "none";
+    document.getElementById("viewThree").style.display = (m==="3d") ? "block" : "none";
+    document.getElementById("btn2d").style.background = (m==="2d") ? "rgba(255,255,255,0.22)" : "rgba(255,255,255,0.14)";
+    document.getElementById("btn3d").style.background = (m==="3d") ? "rgba(255,255,255,0.22)" : "rgba(255,255,255,0.14)";
+    if (m==="3d" && renderer3D){
+      var w = document.getElementById("viewThree").clientWidth || 520;
+      renderer3D.setSize(w, 300, false);
+      camera3D.aspect = w/300; camera3D.updateProjectionMatrix();
+      // 走行中でなければペース選択画面を出す
+      var ov=document.getElementById("startOverlay3d");
+      if (ov) ov.style.display = (playing||gatePhase) ? "none" : "block";
+    }
+  }
+  (function(){
+    var eb=document.getElementById("elev3d");
+    if (eb) eb.innerHTML = GEOM.elevM
+      ? 'コース最高地点 <span style="color:#c0392b">▲'+GEOM.elevM+'m</span>'
+      : 'ほぼ平坦なコース';
+  })();
+  document.getElementById("btn2d").addEventListener("click", function(){ setMode("2d"); });
+  document.getElementById("btn3d").addEventListener("click", function(){ setMode("3d"); });
+  init3D();
+  function drawTrialStrength(h){ var noise=-Math.log(-Math.log(Math.random())); return h.strength+noise; }
+  var pace="M", paceShift={S:-0.04,M:0,H:0.04}, playing=false,t0=null,speedMult=1,raceDur=7000;
+  function pathFrac(progress){
+    // 直線コースは周回しないので %1 で先頭に巻き戻さない
+    if (isStraight) return Math.max(0, Math.min(1, startFrac + lapsSpan*progress));
+    return (startFrac + lapsSpan*progress) % 1;
+  }
+  function place2(progress){
+    lastProgress = progress;
+    var stretch = progress>0.8 ? (progress-0.8)/0.2 : 0;
+    var order=[];
+    horses.forEach(function(h,i){
+      var bias=1+paceShift[pace];
+      var styleOffset = baseOf(h) + kickOf(h)*Math.max(0,progress-0.55)/0.45;
+      var w = Math.max(0,progress-0.3)/0.7;
+      var combined = styleOffset*(1-w) + (h._trialNorm!==undefined?h._trialNorm:0.5)*w;
+      var pr=Math.max(0,Math.min(1,progress*bias));
+      var p=pathFrac(pr);
+      var pt=centerPath.getPointAtLength(p*len);
+      var pt2=centerPath.getPointAtLength(((p+0.003)%1)*len);
+      var nx2=-(pt2.y-pt.y), ny2=(pt2.x-pt.x), nl=Math.sqrt(nx2*nx2+ny2*ny2)||1;
+      // ★前後の開き。以前は combined*10 固定で、コース全長に対し1%程度しか差がつかず
+      //   最初から最後まで団子のままだった。スタート直後は密集、進むほど隊列が縦に伸び、
+      //   直線でさらに広がるように progress 依存でレンジを広げる。
+      var leadRange = 14 + 95*progress + 70*stretch;
+      var lead=(combined-0.5)*leadRange;
+      var lx=pt.x+dirx/dl*lead, ly=pt.y+diry/dl*lead;
+      // ---- 横位置(進路取り) ----
+      // ★以前は枠順どおりの横位置にレース中ずっと固定されていて、逃げ・先行馬が
+      //   内に潜り込む動きが無かった。実際のレースに合わせて
+      //   「スタートは枠順 → 道中は脚質に応じて内/外へ動く → 直線で進路を選んで散る」
+      //   という3段階で横位置を作る。この垂直方向は正が内ラチ側。
+      var mid=(horses.length-1)/2;
+      var laneHome = (mid-i)/Math.max(1,mid);              // +1=最内枠, -1=最外枠
+      var tgt = laneOf(h) + (h._laneJit||0);
+      var w1 = Math.max(0, Math.min(1, (progress-0.08)/0.27));  // 枠順→脚質の位置取りへ
+      var lane = laneHome*(1-w1) + tgt*w1;
+      lane += (h._laneOut||0)*stretch;                     // 直線で外に持ち出す馬
+      lane = Math.max(-1, Math.min(1, lane));
+      var spread = lane * (thick*0.40);
+      var fx = lx+nx2/nl*spread, fy = ly+ny2/nl*spread;
+      h.el.setAttribute("transform","translate("+fx+","+fy+")");
+      if (h.mesh3D){
+        var mx=(fx-cx)*SCALE3D, mz=(fy-cy)*SCALE3D, my=elevAtFrac(p);
+        h.mesh3D.position.set(mx, my+0.34, mz);
+        if (h.shadow3D) h.shadow3D.position.set(mx, my+0.03, mz);
+      }
+      h._offset=combined; order.push(h);
+    });
+    order.sort(function(a,b){return b._offset-a._offset;});
+    var remain=Math.round((1-progress)*GEOM.distance/10)*10;
+    document.getElementById("progressLabel").textContent = progress>0.99?"ゴール":(progress<0.15?"テン争い ":"道中 ")+"残り約"+Math.max(remain,0)+"m";
+    var d3=document.getElementById("dist3d");
+    if (d3) d3.textContent = progress>0.99 ? "0" : String(Math.max(remain,0));
+    var s3=document.getElementById("sect3d");
+    if (s3){
+      var seg=sectionLabel(progress, remain);
+      s3.textContent=seg[0]; s3.style.background=seg[1];
+    }
+    var gr=document.getElementById("grade3d");
+    if (gr){
+      if (!GEOM.elevM){ gr.textContent="平坦"; gr.style.color="#5a6b73"; }
+      else {
+        var gp=gradePctAtProgress(progress);
+        if (Math.abs(gp)<0.05){ gr.textContent="平坦"; gr.style.color="#5a6b73"; }
+        else if (gp>0){ gr.textContent="登り ↗ 勾配"+gp.toFixed(1)+"%"; gr.style.color="#c0392b"; }
+        else { gr.textContent="下り ↘ 勾配"+Math.abs(gp).toFixed(1)+"%"; gr.style.color="#2f6ea8"; }
+      }
+    }
+    return order;
+  }
+  // ---- 区間ラベル判定 ----
+  // ★競馬のコーナー番号は「ゴール前の最終直線の直前のコーナーが必ず4角」。
+  //   3角→4角→最終直線 の順で、レース中に最初に迎えるコーナーであっても
+  //   最終直線の直前ならそれは4角。以前は楕円の左右どちらの弧かで機械的に
+  //   決めていたため、この規則を満たしていなかった。
+  //   ここでは「その弧を進んだ先が最終直線かどうか」で3〜4角/1〜2角を判定する。
+  var goalIsLower = goalPtActual.y > cy;
+  function inStraightAt(pf){
+    var p=centerPath.getPointAtLength(((pf%1)+1)%1*len);
+    return {straight: Math.abs(p.x-cx) <= straightHalf, lower: p.y > cy};
+  }
+  function arcLeadsToHomeStraight(pf){
+    // 現在の弧を進行方向に辿り、最初に到達する直線が最終直線(=ゴールのある側)か
+    for (var k=1;k<=180;k++){
+      var s=inStraightAt(pf + k*0.0035);
+      if (s.straight) return s.lower === goalIsLower;
+    }
+    return false;
+  }
+  function sectionLabel(progress, remain){
+    if (progress>0.995) return ["ゴール","#e2453f"];
+    if (progress<0.12)  return ["テン争い","#3b7fe0"];
+    if (remain<=100)    return ["ゴール前","#e2453f"];
+    if (remain<=300)    return ["ラスト300m","#e2453f"];
+    var pf=pathFrac(Math.max(0,Math.min(1,progress)));
+    var here=inStraightAt(pf);
+    if (here.straight) {
+      return here.lower === goalIsLower ? ["直線","#3b7fe0"] : ["向正面","#5a8f3c"];
+    }
+    return arcLeadsToHomeStraight(pf) ? ["3〜4角","#3b7fe0"] : ["1〜2角","#3b7fe0"];
+  }
+  function rollTrial(){
+    var vals=horses.map(function(h){return drawTrialStrength(h);});
+    var min=Math.min.apply(null,vals), max=Math.max.apply(null,vals);
+    horses.forEach(function(h,i){
+      h._trialNorm=(vals[i]-min)/((max-min)||1);
+      // 進路取りの揺らぎ。同じ脚質の馬が完全に重ならないよう馬ごとにばらけさせ、
+      // 試行のたびに引き直すので毎回違う位置取りになる。
+      h._laneJit = (Math.random()-0.5)*0.42;
+      h._laneOut = (Math.random()-0.5)*0.55;
+    });
+  }
+  rollTrial(); place2(0);
+  function frame(ts){
+    if(!playing) return; if(!t0) t0=ts;
+    var progress=Math.min(1,((ts-t0)*speedMult)/raceDur);
+    place2(progress);
+    if(progress<1) requestAnimationFrame(frame); else finish();
+  }
+  function finish(){
+    playing=false;
+    var order=place2(1).slice(0,5);
+    var medals=["1着","2着","3着","4着","5着"];
+    document.getElementById("results").innerHTML = order.map(function(h,i){
+      return '<div class="resrow"><span style="color:#5DCAA5;font-weight:500;font-size:13px;width:32px">'+medals[i]+'</span>'+
+        '<span class="num" style="background:'+h.color+';color:'+h.text_color+'">'+h.num+'</span>'+
+        '<span style="font-size:13px;font-weight:500;flex:1">'+h.name+
+          '<span style="font-size:10px;color:rgba(255,255,255,0.45);margin-left:6px">'+
+          (h.styleKnown?h.style:'脚質不明')+'</span></span>'+
+        '<span style="font-size:11px;color:rgba(255,255,255,0.55)">'+(h.p_win!==undefined?('勝率'+(h.p_win*100).toFixed(0)+'%・'):'')+'複勝率'+(h.p_top3*100).toFixed(0)+'%</span></div>';
+    }).join("");
+    document.getElementById("playBtn").textContent="▶ もう一回（別の試行）";
+    var ov=document.getElementById("startOverlay3d");
+    if (ov && mode==="3d") ov.style.display="block";
+  }
+  function placeInGate(){
+    // 枠入り時は各馬をゲート内の自分の馬房に整列させる(前後差は付けない)
+    var sp=centerPath.getPointAtLength(startFrac*len);
+    var sp2=centerPath.getPointAtLength(((startFrac*len)+3)%len);
+    var tx=sp2.x-sp.x, ty=sp2.y-sp.y, tl=Math.sqrt(tx*tx+ty*ty)||1;
+    tx/=tl; ty/=tl;
+    var nxp=-ty, nyp=tx;
+    var n=horses.length;
+    var cellSvg=gateCellW()/SCALE3D;  // buildGate3D の馬房幅と一致させる
+    horses.forEach(function(h,i){
+      // ★この法線(nxp,nyp)は正が内ラチ側。(i-mid)のままだと1番が外に立ち、
+      //   ゲート枠(1番=最内)と馬の位置が左右逆にズレていた。
+      var off=((n-1)/2-i)*cellSvg;
+      var fx=sp.x+nxp*off, fy=sp.y+nyp*off;
+      h.el.setAttribute("transform","translate("+fx+","+fy+")");
+      if (h.mesh3D){
+        var mx=(fx-cx)*SCALE3D, mz=(fy-cy)*SCALE3D, my=elevAtFrac(startFrac);
+        h.mesh3D.position.set(mx, my+0.34, mz);
+        if (h.shadow3D) h.shadow3D.position.set(mx, my+0.03, mz);
+      }
+    });
+  }
+  function setSect(label, col){
+    var s3=document.getElementById("sect3d");
+    if (s3){ s3.textContent=label; s3.style.background=col; }
+  }
+  function startSequence(btn){
+    // ★ゲートイン演出: いきなり走り出すと各馬の位置取りが分からないため、
+    //   枠入り(ゲート表示・静止) → 発走(ゲート消滅) の2段階を挟む。
+    document.getElementById("results").innerHTML="";
+    rollTrial();
+    playing=false; t0=null;
+    lastProgress=0;
+    gatePhase=true;
+    placeInGate();
+    if (gate3D) gate3D.visible = true;
+    btn.textContent="枠入り...";
+    setSect("枠入り", "#3b7fe0");
+    var d3=document.getElementById("dist3d");
+    if (d3) d3.textContent=String(GEOM.distance);
+    document.getElementById("progressLabel").textContent="枠入り";
+    setTimeout(function(){
+      btn.textContent="スタート！";
+      setSect("発走", "#e2453f");
+      setTimeout(function(){
+        if (gate3D) gate3D.visible = false;
+        gatePhase=false;
+        playing=true; t0=null;
+        btn.textContent="走行中...";
+        requestAnimationFrame(frame);
+      }, 600);
+    }, 1800);
+  }
+  document.getElementById("playBtn").addEventListener("click", function(){
+    var ov=document.getElementById("startOverlay3d");
+    if (ov) ov.style.display="none";
+    startSequence(this);
+  });
+  // ペース選択(S/M/H)。paceShiftで道中の進み方に反映される。
+  Array.prototype.forEach.call(document.querySelectorAll(".paceBtn"), function(b){
+    b.addEventListener("click", function(){
+      pace=this.getAttribute("data-p");
+      Array.prototype.forEach.call(document.querySelectorAll(".paceBtn"), function(x){
+        var on = x.getAttribute("data-p")===pace;
+        x.style.background = on ? "#3b7fe0" : "#fff";
+        x.style.color = on ? "#fff" : "#1c2b34";
+      });
+    });
+  });
+  document.getElementById("startRaceBtn").addEventListener("click", function(){
+    document.getElementById("startOverlay3d").style.display="none";
+    startSequence(document.getElementById("playBtn"));
+  });
+  document.getElementById("spdBtn").addEventListener("click", function(){
+    speedMult = speedMult===1?2:1; this.textContent = speedMult===1?"速度 x2":"速度 x1";
+  });
+  document.getElementById("playBtn").click();
+})();
+</script>
+</body></html>

@@ -1,0 +1,293 @@
+{
+ "date": "2026-11-15",
+ "date_label": "2026年11月15日",
+ "venues": [
+  {
+   "place": "福島",
+   "races": [
+    {
+     "race_id": "202603030401",
+     "rno": 1,
+     "name": "２歳未勝利",
+     "surface": "ダート",
+     "distance": 1150,
+     "file": "race_sim_202603030401.html"
+    },
+    {
+     "race_id": "202603030402",
+     "rno": 2,
+     "name": "２歳未勝利",
+     "surface": "芝",
+     "distance": 1800,
+     "file": "race_sim_202603030402.html"
+    },
+    {
+     "race_id": "202603030403",
+     "rno": 3,
+     "name": "３歳以上１勝クラス",
+     "surface": "ダート",
+     "distance": 1700,
+     "file": "race_sim_202603030403.html"
+    },
+    {
+     "race_id": "202603030406",
+     "rno": 6,
+     "name": "２歳新馬",
+     "surface": "ダート",
+     "distance": 1700,
+     "file": "race_sim_202603030406.html"
+    },
+    {
+     "race_id": "202603030407",
+     "rno": 7,
+     "name": "３歳以上１勝クラス",
+     "surface": "芝",
+     "distance": 1200,
+     "file": "race_sim_202603030407.html"
+    },
+    {
+     "race_id": "202603030408",
+     "rno": 8,
+     "name": "３歳以上１勝クラス",
+     "surface": "ダート",
+     "distance": 1150,
+     "file": "race_sim_202603030408.html"
+    },
+    {
+     "race_id": "202603030409",
+     "rno": 9,
+     "name": "福島２歳Ｓ",
+     "surface": "芝",
+     "distance": 1200,
+     "file": "race_sim_202603030409.html"
+    },
+    {
+     "race_id": "202603030410",
+     "rno": 10,
+     "name": "三陸特別",
+     "surface": "芝",
+     "distance": 2600,
+     "file": "race_sim_202603030410.html"
+    },
+    {
+     "race_id": "202603030411",
+     "rno": 11,
+     "name": "福島民友Ｃ",
+     "surface": "ダート",
+     "distance": 1700,
+     "file": "race_sim_202603030411.html"
+    },
+    {
+     "race_id": "202603030412",
+     "rno": 12,
+     "name": "３歳以上１勝クラス",
+     "surface": "芝",
+     "distance": 2000,
+     "file": "race_sim_202603030412.html"
+    }
+   ]
+  },
+  {
+   "place": "東京",
+   "races": [
+    {
+     "race_id": "202605050401",
+     "rno": 1,
+     "name": "２歳未勝利",
+     "surface": "ダート",
+     "distance": 1400,
+     "file": "race_sim_202605050401.html"
+    },
+    {
+     "race_id": "202605050402",
+     "rno": 2,
+     "name": "２歳未勝利",
+     "surface": "芝",
+     "distance": 1800,
+     "file": "race_sim_202605050402.html"
+    },
+    {
+     "race_id": "202605050403",
+     "rno": 3,
+     "name": "２歳未勝利",
+     "surface": "芝",
+     "distance": 1400,
+     "file": "race_sim_202605050403.html"
+    },
+    {
+     "race_id": "202605050404",
+     "rno": 4,
+     "name": "２歳新馬",
+     "surface": "ダート",
+     "distance": 1600,
+     "file": "race_sim_202605050404.html"
+    },
+    {
+     "race_id": "202605050405",
+     "rno": 5,
+     "name": "２歳新馬",
+     "surface": "芝",
+     "distance": 1600,
+     "file": "race_sim_202605050405.html"
+    },
+    {
+     "race_id": "202605050406",
+     "rno": 6,
+     "name": "３歳以上１勝クラス",
+     "surface": "ダート",
+     "distance": 1600,
+     "file": "race_sim_202605050406.html"
+    },
+    {
+     "race_id": "202605050407",
+     "rno": 7,
+     "name": "３歳以上２勝クラス",
+     "surface": "ダート",
+     "distance": 1400,
+     "file": "race_sim_202605050407.html"
+    },
+    {
+     "race_id": "202605050408",
+     "rno": 8,
+     "name": "３歳以上２勝クラス",
+     "surface": "芝",
+     "distance": 1800,
+     "file": "race_sim_202605050408.html"
+    },
+    {
+     "race_id": "202605050409",
+     "rno": 9,
+     "name": "銀嶺Ｓ",
+     "surface": "ダート",
+     "distance": 1400,
+     "file": "race_sim_202605050409.html"
+    },
+    {
+     "race_id": "202605050410",
+     "rno": 10,
+     "name": "ユートピアＳ",
+     "surface": "芝",
+     "distance": 1800,
+     "file": "race_sim_202605050410.html"
+    },
+    {
+     "race_id": "202605050411",
+     "rno": 11,
+     "name": "オーロＣ",
+     "surface": "芝",
+     "distance": 1400,
+     "file": "race_sim_202605050411.html"
+    },
+    {
+     "race_id": "202605050412",
+     "rno": 12,
+     "name": "３歳以上１勝クラス",
+     "surface": "芝",
+     "distance": 2000,
+     "file": "race_sim_202605050412.html"
+    }
+   ]
+  },
+  {
+   "place": "京都",
+   "races": [
+    {
+     "race_id": "202608050401",
+     "rno": 1,
+     "name": "２歳未勝利",
+     "surface": "ダート",
+     "distance": 1800,
+     "file": "race_sim_202608050401.html"
+    },
+    {
+     "race_id": "202608050402",
+     "rno": 2,
+     "name": "２歳未勝利",
+     "surface": "芝",
+     "distance": 1600,
+     "file": "race_sim_202608050402.html"
+    },
+    {
+     "race_id": "202608050403",
+     "rno": 3,
+     "name": "２歳未勝利",
+     "surface": "芝",
+     "distance": 2000,
+     "file": "race_sim_202608050403.html"
+    },
+    {
+     "race_id": "202608050404",
+     "rno": 4,
+     "name": "２歳新馬",
+     "surface": "ダート",
+     "distance": 1400,
+     "file": "race_sim_202608050404.html"
+    },
+    {
+     "race_id": "202608050405",
+     "rno": 5,
+     "name": "２歳新馬",
+     "surface": "芝",
+     "distance": 1600,
+     "file": "race_sim_202608050405.html"
+    },
+    {
+     "race_id": "202608050406",
+     "rno": 6,
+     "name": "３歳以上１勝クラス",
+     "surface": "ダート",
+     "distance": 1800,
+     "file": "race_sim_202608050406.html"
+    },
+    {
+     "race_id": "202608050407",
+     "rno": 7,
+     "name": "３歳以上１勝クラス",
+     "surface": "芝",
+     "distance": 1600,
+     "file": "race_sim_202608050407.html"
+    },
+    {
+     "race_id": "202608050408",
+     "rno": 8,
+     "name": "３歳以上２勝クラス",
+     "surface": "ダート",
+     "distance": 1200,
+     "file": "race_sim_202608050408.html"
+    },
+    {
+     "race_id": "202608050409",
+     "rno": 9,
+     "name": "黄菊賞",
+     "surface": "芝",
+     "distance": 2000,
+     "file": "race_sim_202608050409.html"
+    },
+    {
+     "race_id": "202608050410",
+     "rno": 10,
+     "name": "花背特別",
+     "surface": "ダート",
+     "distance": 1800,
+     "file": "race_sim_202608050410.html"
+    },
+    {
+     "race_id": "202608050411",
+     "rno": 11,
+     "name": "エリザベス女王杯",
+     "surface": "芝",
+     "distance": 2200,
+     "file": "race_sim_202608050411.html"
+    },
+    {
+     "race_id": "202608050412",
+     "rno": 12,
+     "name": "ドンカスターＣ",
+     "surface": "芝",
+     "distance": 1800,
+     "file": "race_sim_202608050412.html"
+    }
+   ]
+  }
+ ]
+}

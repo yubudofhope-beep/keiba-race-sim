@@ -1,0 +1,192 @@
+{
+ "date": "2026-11-21",
+ "date_label": "2026年11月21日",
+ "venues": [
+  {
+   "place": "福島",
+   "races": [
+    {
+     "race_id": "202603030501",
+     "rno": 1,
+     "name": "２歳未勝利",
+     "surface": "ダート",
+     "distance": 1700,
+     "file": "race_sim_202603030501.html"
+    },
+    {
+     "race_id": "202603030502",
+     "rno": 2,
+     "name": "３歳以上１勝クラス",
+     "surface": "ダート",
+     "distance": 1150,
+     "file": "race_sim_202603030502.html"
+    },
+    {
+     "race_id": "202603030503",
+     "rno": 3,
+     "name": "２歳未勝利",
+     "surface": "ダート",
+     "distance": 1700,
+     "file": "race_sim_202603030503.html"
+    },
+    {
+     "race_id": "202603030506",
+     "rno": 6,
+     "name": "３歳以上１勝クラス",
+     "surface": "ダート",
+     "distance": 1700,
+     "file": "race_sim_202603030506.html"
+    },
+    {
+     "race_id": "202603030507",
+     "rno": 7,
+     "name": "２歳未勝利",
+     "surface": "芝",
+     "distance": 1800,
+     "file": "race_sim_202603030507.html"
+    },
+    {
+     "race_id": "202603030508",
+     "rno": 8,
+     "name": "３歳以上１勝クラス",
+     "surface": "芝",
+     "distance": 2000,
+     "file": "race_sim_202603030508.html"
+    },
+    {
+     "race_id": "202603030509",
+     "rno": 9,
+     "name": "高湯温泉特別",
+     "surface": "芝",
+     "distance": 1800,
+     "file": "race_sim_202603030509.html"
+    },
+    {
+     "race_id": "202603030510",
+     "rno": 10,
+     "name": "福島放送賞",
+     "surface": "ダート",
+     "distance": 1150,
+     "file": "race_sim_202603030510.html"
+    },
+    {
+     "race_id": "202603030511",
+     "rno": 11,
+     "name": "福島記念",
+     "surface": "芝",
+     "distance": 2000,
+     "file": "race_sim_202603030511.html"
+    },
+    {
+     "race_id": "202603030512",
+     "rno": 12,
+     "name": "３歳以上１勝クラス",
+     "surface": "芝",
+     "distance": 1200,
+     "file": "race_sim_202603030512.html"
+    }
+   ]
+  },
+  {
+   "place": "京都",
+   "races": [
+    {
+     "race_id": "202608050501",
+     "rno": 1,
+     "name": "２歳未勝利",
+     "surface": "ダート",
+     "distance": 1400,
+     "file": "race_sim_202608050501.html"
+    },
+    {
+     "race_id": "202608050502",
+     "rno": 2,
+     "name": "２歳未勝利",
+     "surface": "ダート",
+     "distance": 1800,
+     "file": "race_sim_202608050502.html"
+    },
+    {
+     "race_id": "202608050503",
+     "rno": 3,
+     "name": "２歳未勝利",
+     "surface": "芝",
+     "distance": 1200,
+     "file": "race_sim_202608050503.html"
+    },
+    {
+     "race_id": "202608050504",
+     "rno": 4,
+     "name": "２歳未勝利",
+     "surface": "芝",
+     "distance": 1800,
+     "file": "race_sim_202608050504.html"
+    },
+    {
+     "race_id": "202608050505",
+     "rno": 5,
+     "name": "２歳新馬",
+     "surface": "芝",
+     "distance": 1600,
+     "file": "race_sim_202608050505.html"
+    },
+    {
+     "race_id": "202608050506",
+     "rno": 6,
+     "name": "２歳新馬",
+     "surface": "ダート",
+     "distance": 1200,
+     "file": "race_sim_202608050506.html"
+    },
+    {
+     "race_id": "202608050507",
+     "rno": 7,
+     "name": "３歳以上１勝クラス",
+     "surface": "ダート",
+     "distance": 1800,
+     "file": "race_sim_202608050507.html"
+    },
+    {
+     "race_id": "202608050508",
+     "rno": 8,
+     "name": "３歳以上２勝クラス",
+     "surface": "ダート",
+     "distance": 1400,
+     "file": "race_sim_202608050508.html"
+    },
+    {
+     "race_id": "202608050509",
+     "rno": 9,
+     "name": "秋明菊賞",
+     "surface": "芝",
+     "distance": 1400,
+     "file": "race_sim_202608050509.html"
+    },
+    {
+     "race_id": "202608050510",
+     "rno": 10,
+     "name": "比叡ステークス",
+     "surface": "芝",
+     "distance": 2400,
+     "file": "race_sim_202608050510.html"
+    },
+    {
+     "race_id": "202608050511",
+     "rno": 11,
+     "name": "シトリンステークス",
+     "surface": "ダート",
+     "distance": 1900,
+     "file": "race_sim_202608050511.html"
+    },
+    {
+     "race_id": "202608050512",
+     "rno": 12,
+     "name": "３歳以上２勝クラス",
+     "surface": "芝",
+     "distance": 2000,
+     "file": "race_sim_202608050512.html"
+    }
+   ]
+  }
+ ]
+}
